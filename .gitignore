@@ -1,0 +1,9 @@
+build/
+native/linux/
+native/windows/
+native/macos/
+*.o
+*.a
+*.so
+*.dll
+*.dylib
