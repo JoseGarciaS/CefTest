@@ -3,16 +3,17 @@ project(CefTest)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Point to the CEF distribution for the current platform
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(CEF_ROOT "/home/Amongus/Repos/CEF/linux")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(CEF_ROOT "C:/Repos/CEF/windows")  # adjust later
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(CEF_ROOT "/home/Amongus/Repos/CEF/macos")  # adjust later
+if(NOT CEF_ROOT)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(CEF_ROOT "/tmp/cef/linux")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(CEF_ROOT "C:/cef/windows")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        set(CEF_ROOT "/tmp/cef/macos")
+    endif()
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
 
 find_package(CEF REQUIRED)
 

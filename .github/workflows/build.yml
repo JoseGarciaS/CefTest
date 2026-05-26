@@ -49,7 +49,7 @@ jobs:
         run: |
           mkdir -p native/build/windows
           cd native/build/windows
-          cmake -DCMAKE_BUILD_TYPE=Release -DCEF_ROOT=C:\cef\windows -DCMAKE_MODULE_PATH=C:\cef\windows\cmake ../..
+          cmake -DCMAKE_BUILD_TYPE=Release -DCEF_ROOT=C:/cef/windows ../..
           cmake --build . --target libcef_dll_wrapper --config Release
 
       - name: Upload artifacts
