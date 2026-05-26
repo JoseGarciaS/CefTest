@@ -59,7 +59,7 @@ jobs:
           path: native/build/windows/libcef_dll_wrapper/Release/libcef_dll_wrapper.lib
 
   build-macos:
-    runs-on: macos-13
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
 
