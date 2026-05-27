@@ -100,7 +100,6 @@ jobs:
         run: |
           mkdir -p native/stage/runtimes/osx-x64/native
           cp -a /tmp/cef/macos/Release/. native/stage/runtimes/osx-x64/native/
-          cp -a /tmp/cef/macos/Resources/. native/stage/runtimes/osx-x64/native/
           cp -a native/build/macos/libCefNative.dylib native/stage/runtimes/osx-x64/native/
           cp -a native/build/macos/cef_subprocess native/stage/runtimes/osx-x64/native/
 
