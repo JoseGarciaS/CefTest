@@ -7,3 +7,6 @@ native/macos/
 *.so
 *.dll
 *.dylib
+native/stage/
+/native/dotnet/CefNative/bin
+/native/dotnet/CefNative/obj
