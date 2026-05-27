@@ -7,7 +7,6 @@ on:
     branches: [main]
 
 jobs:
-
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -110,42 +109,42 @@ jobs:
           name: runtime-osx-x64
           path: native/stage/runtimes/osx-x64/native
 
-pack-nuget:
-    runs-on: ubuntu-latest
-    needs: [build-linux, build-windows, build-macos]
-    steps:
-      - uses: actions/checkout@v4
+  pack-nuget:
+      runs-on: ubuntu-latest
+      needs: [build-linux, build-windows, build-macos]
+      steps:
+        - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: '10.0.x'
 
-      - name: Download linux runtime
-        uses: actions/download-artifact@v4
-        with:
-          name: runtime-linux-x64
-          path: native/stage/runtimes/linux-x64/native
+        - name: Download linux runtime
+          uses: actions/download-artifact@v4
+          with:
+            name: runtime-linux-x64
+            path: native/stage/runtimes/linux-x64/native
 
-      - name: Download windows runtime
-        uses: actions/download-artifact@v4
-        with:
-          name: runtime-win-x64
-          path: native/stage/runtimes/win-x64/native
+        - name: Download windows runtime
+          uses: actions/download-artifact@v4
+          with:
+            name: runtime-win-x64
+            path: native/stage/runtimes/win-x64/native
 
-      - name: Download macos runtime
-        uses: actions/download-artifact@v4
-        with:
-          name: runtime-osx-x64
-          path: native/stage/runtimes/osx-x64/native
+        - name: Download macos runtime
+          uses: actions/download-artifact@v4
+          with:
+            name: runtime-osx-x64
+            path: native/stage/runtimes/osx-x64/native
 
-      - name: Pack NuGet
-        run: |
-          cd dotnet/CefNative
-          dotnet pack -c Release -o ../../artifacts
+        - name: Pack NuGet
+          run: |
+            cd dotnet/CefNative
+            dotnet pack -c Release -o ../../artifacts
 
-      - name: Upload NuGet artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuget-package
-          path: artifacts/*.nupkg
+        - name: Upload NuGet artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: nuget-package
+            path: artifacts/*.nupkg
