@@ -21,18 +21,26 @@ jobs:
           mkdir -p /tmp/cef/linux
           tar -xjf cef_linux.tar.bz2 -C /tmp/cef/linux --strip-components=1
 
-      - name: Build wrapper
+      - name: Build project
         run: |
           mkdir -p native/build/linux
           cd native/build/linux
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCEF_ROOT=/tmp/cef/linux ../..
-          cmake --build . --target libcef_dll_wrapper
+          cmake --build . --target cef_subprocess CefNative
+
+      - name: Stage runtime (linux-x64)
+        run: |
+          mkdir -p native/stage/runtimes/linux-x64/native
+          cp -a /tmp/cef/linux/Release/. native/stage/runtimes/linux-x64/native/
+          cp -a /tmp/cef/linux/Resources/. native/stage/runtimes/linux-x64/native/
+          cp -a native/build/linux/libCefNative.so native/stage/runtimes/linux-x64/native/
+          cp -a native/build/linux/cef_subprocess native/stage/runtimes/linux-x64/native/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cef-linux
-          path: native/build/linux/libcef_dll_wrapper/libcef_dll_wrapper.a
+          name: runtime-linux-x64
+          path: native/stage/runtimes/linux-x64/native
 
   build-windows:
     runs-on: windows-latest
@@ -45,18 +53,27 @@ jobs:
           mkdir C:\cef\windows
           tar -xjf cef_windows.tar.bz2 -C C:\cef\windows --strip-components=1
 
-      - name: Build wrapper
+      - name: Build project
         run: |
           mkdir -p native/build/windows
           cd native/build/windows
           cmake -DCMAKE_BUILD_TYPE=Release -DCEF_ROOT=C:/cef/windows ../..
-          cmake --build . --target libcef_dll_wrapper --config Release
+          cmake --build . --target cef_subprocess CefNative --config Release
+
+      - name: Stage runtime (win-x64)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force native\stage\runtimes\win-x64\native | Out-Null
+          Copy-Item -Recurse -Force C:\cef\windows\Release\* native\stage\runtimes\win-x64\native\
+          Copy-Item -Recurse -Force C:\cef\windows\Resources\* native\stage\runtimes\win-x64\native\
+          Copy-Item -Force native\build\windows\Release\CefNative.dll native\stage\runtimes\win-x64\native\
+          Copy-Item -Force native\build\windows\Release\cef_subprocess.exe native\stage\runtimes\win-x64\native\
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cef-windows
-          path: native/build/windows/libcef_dll_wrapper/Release/libcef_dll_wrapper.lib
+          name: runtime-win-x64
+          path: native/stage/runtimes/win-x64/native
 
   build-macos:
     runs-on: macos-15-intel
@@ -72,15 +89,23 @@ jobs:
           mkdir -p /tmp/cef/macos
           tar -xjf cef_macos.tar.bz2 -C /tmp/cef/macos --strip-components=1
 
-      - name: Build wrapper
+      - name: Build project
         run: |
           mkdir -p native/build/macos
           cd native/build/macos
           cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCEF_ROOT=/tmp/cef/macos ../..
-          cmake --build . --target libcef_dll_wrapper
+          cmake --build . --target cef_subprocess CefNative
+
+      - name: Stage runtime (osx-x64)
+        run: |
+          mkdir -p native/stage/runtimes/osx-x64/native
+          cp -a /tmp/cef/macos/Release/. native/stage/runtimes/osx-x64/native/
+          cp -a /tmp/cef/macos/Resources/. native/stage/runtimes/osx-x64/native/
+          cp -a native/build/macos/libCefNative.dylib native/stage/runtimes/osx-x64/native/
+          cp -a native/build/macos/cef_subprocess native/stage/runtimes/osx-x64/native/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cef-macos
-          path: native/build/macos/libcef_dll_wrapper/libcef_dll_wrapper.a
+          name: runtime-osx-x64
+          path: native/stage/runtimes/osx-x64/native
