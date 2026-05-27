@@ -2,24 +2,36 @@ using System.Runtime.InteropServices;
 
 namespace CefNative;
 
+public class CefOptions
+{
+    public string? CacheDir { get; set; }
+}
+
 public static class Cef
 {
     private const string LibName = "CefNative";
 
-    [DllImport(LibName, EntryPoint = "CefNative_RunHelloWorld")]
-    public static extern int RunHelloWorld(
-        int argc,
-        string[] argv,
-        string resourcesDir,
-        string localesDir,
-        string cacheDir);
-
     [DllImport(LibName, EntryPoint = "CefNative_RunHelloWorldWithSubprocessPath")]
-    public static extern int RunHelloWorldWithSubprocessPath(
+    private static extern int _RunWithSubprocess(
         int argc,
         string[] argv,
         string resourcesDir,
         string localesDir,
         string cacheDir,
         string browserSubprocessPath);
+
+    public static int Run(CefOptions? options = null)
+    {
+        options ??= new CefOptions();
+
+        var baseDir = AppContext.BaseDirectory;
+        var cacheDir = options.CacheDir ?? Path.Combine(baseDir, "cef_cache");
+        var subprocessPath = Path.Combine(baseDir, RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "cef_subprocess.exe"
+            : "cef_subprocess");
+
+        string[] argv = [baseDir];
+
+        return _RunWithSubprocess(argv.Length, argv, baseDir, baseDir, cacheDir, subprocessPath);
+    }
 }
