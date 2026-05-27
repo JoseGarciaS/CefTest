@@ -23,3 +23,4 @@ extern "C" {
       const char* cache_dir,
       const char* browser_subprocess_path);
 }
+

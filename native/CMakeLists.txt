@@ -3,6 +3,10 @@ project(CefTest)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if (WIN32)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 if(UNIX AND NOT APPLE)
     set(CMAKE_BUILD_RPATH "$ORIGIN")
     set(CMAKE_INSTALL_RPATH "$ORIGIN")
