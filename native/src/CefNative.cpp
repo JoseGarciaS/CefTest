@@ -108,18 +108,18 @@ std::string BuildHelloUrl() {
     return "data:text/html," + CefURIEncode(html, false).ToString();
 }
 
-bool EnsureLibcefLoaded() {
 #if defined(__linux__)
+bool EnsureLibcefLoaded() {
     void* handle = dlopen("libcef.so", RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {
         const char* error = dlerror();
         std::fprintf(stderr, "Failed to load libcef.so: %s\n",
-                                 error ? error : "unknown error");
+                     error ? error : "unknown error");
         return false;
     }
-#endif
     return true;
 }
+#endif
 
 class SimpleWindowDelegate : public CefWindowDelegate {
  public:
@@ -193,7 +193,12 @@ CEF_NATIVE_EXPORT int CefNative_RunHelloWorldWithSubprocessPath(
         return -1;
     }
 #endif
+    
+#if defined(_WIN32) 
+    CefMainArgs main_args(GetModuleHandle(nullptr));
+#else
     CefMainArgs main_args(argc, argv);
+#endif
 
     int exit_code = CefExecuteProcess(main_args, nullptr, nullptr);
     if (exit_code >= 0) {
