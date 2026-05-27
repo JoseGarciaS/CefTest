@@ -49,6 +49,11 @@ target_include_directories(CefNative PRIVATE
     src
 )
 
+# On Windows, prevent min/max macro collisions with std::min/std::max
+if (WIN32)
+    target_compile_definitions(CefNative PRIVATE NOMINMAX)
+endif()
+
 target_link_libraries(CefNative PRIVATE
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS}
@@ -64,6 +69,10 @@ target_include_directories(cef_subprocess PRIVATE
     ${CEF_ROOT}
     src
 )
+
+if (WIN32)
+    target_compile_definitions(cef_subprocess PRIVATE NOMINMAX)
+endif()
 
 target_link_libraries(cef_subprocess PRIVATE
     libcef_dll_wrapper
