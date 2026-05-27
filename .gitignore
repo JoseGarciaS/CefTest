@@ -7,6 +7,13 @@ native/macos/
 *.so
 *.dll
 *.dylib
+artifacts/
 native/stage/
 /native/dotnet/CefNative/bin
 /native/dotnet/CefNative/obj
+/dotnet/CefNative/bin
+/dotnet/CefNative/obj
+/dotnet/CefNative.Test/bin
+/dotnet/CefNative.Test/dotnet/CefNative.Test/obj
+/dotnet/CefNative.Test/obj
+/unused
