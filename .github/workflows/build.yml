@@ -165,6 +165,12 @@ jobs:
             cd dotnet/CefNative
             dotnet pack -c Release -o ../../artifacts /p:Version=1.0.${{ github.run_number }}
 
+        - name: Upload package artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: nupkg
+            path: artifacts/*.nupkg
+
         - name: Publish to GitHub Packages
           run: |
             dotnet nuget push artifacts/*.nupkg \
