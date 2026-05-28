@@ -20,7 +20,10 @@
   <ItemGroup>
     <None Include="../../native/stage/runtimes/**" Pack="true">
       <PackagePath>runtimes/</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Include="../../native/stage/buildTransitive/**" Pack="true">
+      <PackagePath>buildTransitive/</PackagePath>
     </None>
   </ItemGroup>
 

@@ -1,0 +1,18 @@
+<Project>
+  <!-- Extract for local build/run into the build output directory -->
+  <Target Name="ExtractCefMacFrameworkOnBuild"
+          AfterTargets="Build"
+          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip')">
+    <Message Importance="Low" Text="Extracting CEF framework to $(TargetDir)" />
+    <Exec Command="ditto -x -k &quot;$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip&quot; &quot;$(TargetDir)&quot;" />
+  </Target>
+
+  <!-- Ensure framework is present in publish output before publish packages files -->
+  <Target Name="ExtractCefMacFrameworkOnPublish"
+          BeforeTargets="Publish"
+          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip')">
+    <Message Importance="Low" Text="Extracting CEF framework to $(PublishDir)" />
+    <MakeDir Directories="$(PublishDir)" Condition="'$(PublishDir)' != '' and !Exists('$(PublishDir)')" />
+    <Exec Command="ditto -x -k &quot;$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip&quot; &quot;$(PublishDir)&quot;" />
+  </Target>
+</Project>

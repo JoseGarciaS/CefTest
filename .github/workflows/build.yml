@@ -103,9 +103,14 @@ jobs:
       - name: Stage runtime (osx-x64)
         run: |
           mkdir -p native/stage/runtimes/osx-x64/native
-          cp -a /tmp/cef/macos/Release/. native/stage/runtimes/osx-x64/native/
+          mkdir -p native/stage/buildTransitive/osx-x64
+
           cp -a native/build/macos/libCefNative.dylib native/stage/runtimes/osx-x64/native/
           cp -a native/build/macos/cef_subprocess native/stage/runtimes/osx-x64/native/
+
+          # Zip the entire framework bundle so NuGet doesn't see individual .lproj files
+          ditto -c -k --keepParent "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
+            native/stage/buildTransitive/osx-x64/cef_framework.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
