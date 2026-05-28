@@ -1,0 +1,39 @@
+<Project>
+  <!-- Extract for local build/run into the build output directory -->
+  <Target Name="ExtractCefMacFrameworkOnBuild"
+          AfterTargets="Build"
+          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip')">
+    <Message Importance="Low" Text="Extracting CEF framework to $(TargetDir)" />
+    <!-- Preferred on macOS to preserve metadata -->
+    <Exec Command="ditto -x -k &quot;$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip&quot; &quot;$(TargetDir)&quot;"
+          Condition="Exists('/usr/bin/ditto')" />
+
+    <!-- Windows fallback: use PowerShell Expand-Archive if ditto is unavailable -->
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip' -DestinationPath '$(TargetDir)' -Force&quot;"
+          Condition="'$(OS)' == 'Windows_NT'" />
+
+    <!-- Generic fallback for Unix-like systems without ditto: unzip -->
+    <Exec Command="unzip -o &quot;$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip&quot; -d &quot;$(TargetDir)&quot;"
+          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
+  </Target>
+
+  <!-- Ensure framework is present in publish output before publish packages files -->
+  <Target Name="ExtractCefMacFrameworkOnPublish"
+          BeforeTargets="Publish"
+          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip')">
+    <Message Importance="Low" Text="Extracting CEF framework to $(PublishDir)" />
+    <MakeDir Directories="$(PublishDir)" Condition="'$(PublishDir)' != '' and !Exists('$(PublishDir)')" />
+
+    <!-- Preferred on macOS to preserve metadata -->
+    <Exec Command="ditto -x -k &quot;$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip&quot; &quot;$(PublishDir)&quot;"
+          Condition="Exists('/usr/bin/ditto')" />
+
+    <!-- Windows fallback: use PowerShell Expand-Archive if ditto is unavailable -->
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip' -DestinationPath '$(PublishDir)' -Force&quot;"
+          Condition="'$(OS)' == 'Windows_NT'" />
+
+    <!-- Generic fallback for Unix-like systems without ditto: unzip -->
+    <Exec Command="unzip -o &quot;$(MSBuildThisFileDirectory)osx-x64/cef_framework.zip&quot; -d &quot;$(PublishDir)&quot;"
+          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
+  </Target>
+</Project>
