@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>CefNative</AssemblyName>
     <RootNamespace>CefNative</RootNamespace>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>Amongus</Authors>
     <Description>Cross-platform CEF wrapper for .NET</Description>
     <PackageId>CefNative</PackageId>
