@@ -238,16 +238,6 @@ CEF_NATIVE_EXPORT int CefNative_RunHelloWorldWithSubprocessPath(
 
     CefRefPtr<HelloApp> app(new HelloApp());
 
-    // Debug: print resolved browser_subprocess_path
-    {
-        std::string bs = CefString(&settings.browser_subprocess_path).ToString();
-        if (!bs.empty()) {
-            std::fprintf(stderr, "Resolved browser_subprocess_path (len=%zu): '%s'\n", bs.size(), bs.c_str());
-        } else {
-            std::fprintf(stderr, "No browser_subprocess_path set\n");
-        }
-    }
-
     if (!CefInitialize(main_args, settings, app.get(), nullptr)) {
         return CefGetExitCode();
     }

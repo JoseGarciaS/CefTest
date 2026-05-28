@@ -6,10 +6,13 @@
     <Nullable>enable</Nullable>
     <AssemblyName>CefNative</AssemblyName>
     <RootNamespace>CefNative</RootNamespace>
-    <Version>1.0.3</Version>
+    <!-- Version is supplied by CI at pack time: /p:Version=1.0.${{ github.run_number }} -->
     <Authors>Amongus</Authors>
     <Description>Cross-platform CEF wrapper for .NET</Description>
     <PackageId>CefNative</PackageId>
+    <PackageProjectUrl>https://github.com/JoseGarciaS/CefTest</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JoseGarciaS/CefTest</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
