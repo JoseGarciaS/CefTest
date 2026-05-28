@@ -172,8 +172,3 @@ jobs:
               --api-key "${{ secrets.GITHUB_TOKEN }}" \
               --skip-duplicate
 
-        - name: Upload NuGet artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: nuget-package
-            path: artifacts/*.nupkg
