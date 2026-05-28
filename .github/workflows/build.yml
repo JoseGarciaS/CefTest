@@ -109,16 +109,15 @@ jobs:
           cp -a native/build/macos/cef_subprocess native/stage/runtimes/osx-x64/native/
 
           # Zip the entire framework bundle so NuGet doesn't see individual .lproj files
+          # Place the zip inside the native bundle so we upload only the native folder.
           ditto -c -k --keepParent "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
-            native/stage/buildTransitive/osx-x64/cef_framework.zip
+            native/stage/runtimes/osx-x64/native/cef_framework.zip
 
       - name: Upload mac runtime + transitive
         uses: actions/upload-artifact@v4
         with:
           name: runtime-and-transitive-osx-x64
-          path: |
-            native/stage/runtimes/osx-x64/native
-            native/stage/buildTransitive/osx-x64
+          path: native/stage/runtimes/osx-x64/native
 
   pack-nuget:
     runs-on: ubuntu-latest
