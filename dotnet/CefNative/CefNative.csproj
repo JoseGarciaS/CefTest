@@ -25,6 +25,10 @@
     <None Include="../../native/stage/buildTransitive/**" Pack="true">
       <PackagePath>buildTransitive/</PackagePath>
     </None>
+    
+    <None Include="buildTransitive/CefNative.targets" Pack="true">
+      <PackagePath>buildTransitive/</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
