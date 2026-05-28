@@ -2,7 +2,7 @@
   <!-- Extract for local build/run into the build output directory -->
   <PropertyGroup>
     <!-- Paths inside the nupkg when packed: targets are placed in buildTransitive/, runtime zips in runtimes/ -->
-    <CefFrameworkZip_RuntimePath>$(MSBuildThisFileDirectory)..\runtimes\osx-x64\cef_framework.zip</CefFrameworkZip_RuntimePath>
+            <CefFrameworkZip_RuntimePath>$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native\cef_framework.zip</CefFrameworkZip_RuntimePath>
     <CefFrameworkZip_BuildTransitivePath>$(MSBuildThisFileDirectory)osx-x64\cef_framework.zip</CefFrameworkZip_BuildTransitivePath>
   </PropertyGroup>
 
