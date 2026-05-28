@@ -1,57 +1,45 @@
 <Project>
   <!-- Extract for local build/run into the build output directory -->
   <PropertyGroup>
-    <!-- Paths inside the nupkg when packed: targets are placed in buildTransitive/, runtime zips in runtimes/ -->
-            <CefFrameworkZip_RuntimePath>$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native\cef_framework.zip</CefFrameworkZip_RuntimePath>
-    <CefFrameworkZip_BuildTransitivePath>$(MSBuildThisFileDirectory)osx-x64\cef_framework.zip</CefFrameworkZip_BuildTransitivePath>
+    <!-- ZIP lives in buildTransitive so it is imported but not copied as a runtime asset -->
+    <CefFrameworkZip_Path>$(MSBuildThisFileDirectory)osx-x64\cef_framework.zip</CefFrameworkZip_Path>
   </PropertyGroup>
 
   <Target Name="ExtractCefMacFrameworkOnBuild"
           AfterTargets="Build"
-          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and (Exists('$(CefFrameworkZip_RuntimePath)') or Exists('$(CefFrameworkZip_BuildTransitivePath)'))">
+          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(CefFrameworkZip_Path)')">
     <Message Importance="Low" Text="Extracting CEF framework to $(TargetDir)" />
-    <!-- Preferred on macOS to preserve metadata (runtime path if present, otherwise buildTransitive) -->
-    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_RuntimePath)&quot; &quot;$(TargetDir)&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_RuntimePath)')" />
-    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_BuildTransitivePath)&quot; &quot;$(TargetDir)&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_BuildTransitivePath)')" />
+    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_Path)&quot; &quot;$(TargetDir)&quot;"
+          Condition="Exists('/usr/bin/ditto')" />
 
     <!-- Windows fallback: use PowerShell Expand-Archive if ditto is unavailable -->
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_RuntimePath)' -DestinationPath '$(TargetDir)' -Force&quot;"
-          Condition="'$(OS)' == 'Windows_NT' and Exists('$(CefFrameworkZip_RuntimePath)')" />
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_BuildTransitivePath)' -DestinationPath '$(TargetDir)' -Force&quot;"
-          Condition="'$(OS)' == 'Windows_NT' and Exists('$(CefFrameworkZip_BuildTransitivePath)')" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_Path)' -DestinationPath '$(TargetDir)' -Force&quot;"
+          Condition="'$(OS)' == 'Windows_NT'" />
 
     <!-- Generic fallback for Unix-like systems without ditto: unzip -->
-    <Exec Command="unzip -o &quot;$(CefFrameworkZip_RuntimePath)&quot; -d &quot;$(TargetDir)&quot;"
-          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_RuntimePath)')" />
-    <Exec Command="unzip -o &quot;$(CefFrameworkZip_BuildTransitivePath)&quot; -d &quot;$(TargetDir)&quot;"
-          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_BuildTransitivePath)')" />
+    <Exec Command="unzip -o &quot;$(CefFrameworkZip_Path)&quot; -d &quot;$(TargetDir)&quot;"
+          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
+
+      <Delete Files="$(TargetDir)cef_framework.zip" />
   </Target>
 
   <!-- Ensure framework is present in publish output before publish packages files -->
   <Target Name="ExtractCefMacFrameworkOnPublish"
           BeforeTargets="Publish"
-          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and (Exists('$(CefFrameworkZip_RuntimePath)') or Exists('$(CefFrameworkZip_BuildTransitivePath)'))">
+          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(CefFrameworkZip_Path)')">
     <Message Importance="Low" Text="Extracting CEF framework to $(PublishDir)" />
     <MakeDir Directories="$(PublishDir)" Condition="'$(PublishDir)' != '' and !Exists('$(PublishDir)')" />
+    <Delete Files="$(PublishDir)cef_framework.zip" />
 
-    <!-- Preferred on macOS to preserve metadata (runtime path if present, otherwise buildTransitive) -->
-    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_RuntimePath)&quot; &quot;$(PublishDir)&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_RuntimePath)')" />
-    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_BuildTransitivePath)&quot; &quot;$(PublishDir)&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_BuildTransitivePath)')" />
+    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_Path)&quot; &quot;$(PublishDir)&quot;"
+          Condition="Exists('/usr/bin/ditto')" />
 
     <!-- Windows fallback: use PowerShell Expand-Archive if ditto is unavailable -->
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_RuntimePath)' -DestinationPath '$(PublishDir)' -Force&quot;"
-          Condition="'$(OS)' == 'Windows_NT' and Exists('$(CefFrameworkZip_RuntimePath)')" />
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_BuildTransitivePath)' -DestinationPath '$(PublishDir)' -Force&quot;"
-          Condition="'$(OS)' == 'Windows_NT' and Exists('$(CefFrameworkZip_BuildTransitivePath)')" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_Path)' -DestinationPath '$(PublishDir)' -Force&quot;"
+          Condition="'$(OS)' == 'Windows_NT'" />
 
     <!-- Generic fallback for Unix-like systems without ditto: unzip -->
-    <Exec Command="unzip -o &quot;$(CefFrameworkZip_RuntimePath)&quot; -d &quot;$(PublishDir)&quot;"
-          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_RuntimePath)')" />
-    <Exec Command="unzip -o &quot;$(CefFrameworkZip_BuildTransitivePath)&quot; -d &quot;$(PublishDir)&quot;"
-          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto') and Exists('$(CefFrameworkZip_BuildTransitivePath)')" />
+    <Exec Command="unzip -o &quot;$(CefFrameworkZip_Path)&quot; -d &quot;$(PublishDir)&quot;"
+          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
   </Target>
 </Project>
