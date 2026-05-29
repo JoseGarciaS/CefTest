@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(CefTest LANGUAGES C CXX OBJCXX)
+project(CefTest LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -37,7 +37,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(PLATFORM_HANDLER_SRCS src/simple_handler_mac.mm)
     set(CEF_LIB_TARGET "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
-    set_source_files_properties(src/CefNative.cpp PROPERTIES LANGUAGE OBJCXX)
 endif()
 
 
