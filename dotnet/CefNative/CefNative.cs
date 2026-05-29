@@ -51,7 +51,7 @@ public static class Cef
         ? "cef_subprocess.exe"
         : "cef_subprocess");
 
-    string[] argv = [baseDir];
+    string[] argv = [Environment.ProcessPath!];
 
     return _RunWithSubprocess(argv.Length, argv, baseDir, baseDir, cacheDir, subprocessPath);
 }
