@@ -44,8 +44,44 @@
           Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
   </Target>
 
+      <Target Name="CreateCefMacHelperAppOnPublish"
+                              AfterTargets="Publish"
+                              Condition="('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(PublishDir)' != ''">
+            <PropertyGroup>
+                  <_CefMacHelperName>cef_subprocess Helper</_CefMacHelperName>
+                  <_CefMacHelperBinary>$(PublishDir)$(_CefMacHelperName)</_CefMacHelperBinary>
+                  <_CefMacHelperAppDir>$(PublishDir)$(_CefMacHelperName).app</_CefMacHelperAppDir>
+                  <_CefMacHelperContentsDir>$(_CefMacHelperAppDir)/Contents</_CefMacHelperContentsDir>
+                  <_CefMacHelperMacOSDir>$(_CefMacHelperContentsDir)/MacOS</_CefMacHelperMacOSDir>
+            </PropertyGroup>
+
+            <ItemGroup>
+                  <_CefMacHelperInfoPlistLines Include="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="&lt;plist version=&quot;1.0&quot;&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="&lt;dict&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundleExecutable&lt;/key&gt;&lt;string&gt;$(_CefMacHelperName)&lt;/string&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundleIdentifier&lt;/key&gt;&lt;string&gt;com.example.cef_subprocess&lt;/string&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundleName&lt;/key&gt;&lt;string&gt;$(_CefMacHelperName)&lt;/string&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundlePackageType&lt;/key&gt;&lt;string&gt;APPL&lt;/string&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="&lt;/dict&gt;" />
+                  <_CefMacHelperInfoPlistLines Include="&lt;/plist&gt;" />
+            </ItemGroup>
+
+            <RemoveDir Directories="$(_CefMacHelperAppDir)" Condition="Exists('$(_CefMacHelperAppDir)')" />
+            <MakeDir Directories="$(_CefMacHelperMacOSDir)" Condition="Exists('$(_CefMacHelperBinary)')" />
+            <Copy SourceFiles="$(_CefMacHelperBinary)" DestinationFiles="$(_CefMacHelperMacOSDir)/$(_CefMacHelperName)" Condition="Exists('$(_CefMacHelperBinary)')" />
+            <WriteLinesToFile File="$(_CefMacHelperContentsDir)/Info.plist"
+                                                                  Overwrite="true"
+                                                                  Lines="@(_CefMacHelperInfoPlistLines)"
+                                                                  Condition="Exists('$(_CefMacHelperBinary)')" />
+            <Exec Command="chmod +x &quot;$(_CefMacHelperMacOSDir)/$(_CefMacHelperName)&quot;"
+                              Condition="Exists('$(_CefMacHelperBinary)') and Exists('/bin/chmod')" />
+      </Target>
+
   <Target Name="CreateCefMacAppBundleOnPublish"
-          AfterTargets="Publish"
+        AfterTargets="Publish"
+        DependsOnTargets="CreateCefMacHelperAppOnPublish"
           Condition="('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(PublishDir)' != ''">
     <PropertyGroup>
       <_CefMacAppDir>$(PublishDir)$(CefMacAppBundleName).app</_CefMacAppDir>
