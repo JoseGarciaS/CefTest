@@ -63,16 +63,7 @@
     <WriteLinesToFile
       File="$(_CefMacContentsDir)/Info.plist"
       Overwrite="true"
-      Lines='&lt;?xml version="1.0" encoding="UTF-8"?&gt;'
-            '&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;'
-            '&lt;plist version="1.0"&gt;'
-            '&lt;dict&gt;'
-            '  &lt;key&gt;CFBundleExecutable&lt;/key&gt;&lt;string&gt;$(_CefMacHostExecutable)&lt;/string&gt;'
-            '  &lt;key&gt;CFBundleIdentifier&lt;/key&gt;&lt;string&gt;com.example.$(AssemblyName)&lt;/string&gt;'
-            '  &lt;key&gt;CFBundleName&lt;/key&gt;&lt;string&gt;$(CefMacAppBundleName)&lt;/string&gt;'
-            '  &lt;key&gt;CFBundlePackageType&lt;/key&gt;&lt;string&gt;APPL&lt;/string&gt;'
-            '&lt;/dict&gt;'
-            '&lt;/plist&gt;' />
+                  Lines="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;;&#x0D;&#x0A;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;;&#x0D;&#x0A;&lt;plist version=&quot;1.0&quot;&gt;;&#x0D;&#x0A;&lt;dict&gt;;&#x0D;&#x0A;  &lt;key&gt;CFBundleExecutable&lt;/key&gt;&lt;string&gt;$(_CefMacHostExecutable)&lt;/string&gt;;&#x0D;&#x0A;  &lt;key&gt;CFBundleIdentifier&lt;/key&gt;&lt;string&gt;com.example.$(AssemblyName)&lt;/string&gt;;&#x0D;&#x0A;  &lt;key&gt;CFBundleName&lt;/key&gt;&lt;string&gt;$(CefMacAppBundleName)&lt;/string&gt;;&#x0D;&#x0A;  &lt;key&gt;CFBundlePackageType&lt;/key&gt;&lt;string&gt;APPL&lt;/string&gt;;&#x0D;&#x0A;&lt;/dict&gt;;&#x0D;&#x0A;&lt;/plist&gt;" />
 
     <ItemGroup>
       <_CefMacHostFiles Include="$(PublishDir)$(AssemblyName)" />
