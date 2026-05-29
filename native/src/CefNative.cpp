@@ -218,12 +218,17 @@ namespace
         IMPLEMENT_REFCOUNTING(SimpleWindowDelegate);
     };
 
-    class HelloApp : public CefApp, public CefBrowserProcessHandler
+    class HelloApp : public CefApp, public CefBrowserProcessHandler, public CefRenderProcessHandler
     {
     public:
         HelloApp() = default;
 
         CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override
+        {
+            return this;
+        }
+
+        CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override
         {
             return this;
         }
@@ -268,7 +273,7 @@ extern "C"
         const char *cache_dir,
         const char *browser_subprocess_path)
     {
-        CefRefPtr<ProcessApp> process_app(new ProcessApp());
+        CefRefPtr<HelloApp> app(new HelloApp());
 
 #if defined(__linux__)
         if (!EnsureLibcefLoaded())
@@ -283,13 +288,11 @@ extern "C"
         CefMainArgs main_args(argc, argv);
 #endif
 
-        int exit_code = CefExecuteProcess(main_args, process_app.get(), nullptr);
+        int exit_code = CefExecuteProcess(main_args, app.get(), nullptr);
         if (exit_code >= 0)
         {
             return exit_code;
         }
-
-        CefRefPtr<HelloApp> app(new HelloApp());
 
         const std::string exe_dir = GetExecutableDir();
 #if defined(__APPLE__)
