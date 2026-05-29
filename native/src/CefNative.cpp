@@ -289,7 +289,7 @@ extern "C"
 #endif
 
 #if defined(__APPLE__)
-    int exit_code = CefExecuteProcess(main_args, nullptr, nullptr);
+    int exit_code = CefExecuteProcess(main_args, app.get(), nullptr);
 #else
     int exit_code = CefExecuteProcess(main_args, app.get(), nullptr);
 #endif
