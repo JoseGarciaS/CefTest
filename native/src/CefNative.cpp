@@ -263,8 +263,10 @@ extern "C"
         const char *cache_dir,
         const char *browser_subprocess_path)
     {
+#if defined(__OBJC__)
         @autoreleasepool
         {
+#endif
         CefRefPtr<ProcessApp> process_app(new ProcessApp());
 
 #if defined(__linux__)
@@ -349,7 +351,9 @@ extern "C"
         CefRunMessageLoop();
         CefShutdown();
         return 0;
+#if defined(__OBJC__)
         }
+#endif
     }
 
     CEF_NATIVE_EXPORT int CefNative_RunHelloWorld(
