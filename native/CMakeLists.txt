@@ -48,6 +48,14 @@ add_library(CefNative SHARED
     ${PLATFORM_HANDLER_SRCS}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set_target_properties(CefNative PROPERTIES
+        MACOSX_RPATH TRUE
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "@loader_path/../Frameworks"
+    )
+endif()
+
 target_include_directories(CefNative PRIVATE
     ${CEF_ROOT}
     src
