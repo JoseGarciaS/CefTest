@@ -20,7 +20,7 @@ public static class Cef
     [DllImport(LibName, EntryPoint = "CefNative_RunHelloWorldWithSubprocessPath")]
     private static extern int _RunWithSubprocess(
         int argc,
-        string[] argv,
+        [In, MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] argv,
         string resourcesDir,
         string localesDir,
         string cacheDir,
@@ -89,7 +89,7 @@ public static class Cef
         }
     }
 
-    string[] argv = [Environment.ProcessPath!];
+        string[] argv = Environment.GetCommandLineArgs();
 
     return _RunWithSubprocess(argv.Length, argv, resourcesDir, localesDir, cacheDir, subprocessPath);
 }
