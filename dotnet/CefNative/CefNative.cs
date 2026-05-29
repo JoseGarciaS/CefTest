@@ -46,13 +46,51 @@ public static class Cef
     options ??= new CefOptions();
 
     var baseDir = AppContext.BaseDirectory;
+    var resourcesDir = baseDir;
+    var localesDir = baseDir;
     var cacheDir = options.CacheDir ?? Path.Combine(baseDir, "cef_cache");
     var subprocessPath = Path.Combine(baseDir, RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
         ? "cef_subprocess.exe"
         : "cef_subprocess");
 
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+    {
+        var contentsDir = Directory.GetParent(baseDir)?.FullName ?? baseDir;
+        var bundleResourcesDir = Path.Combine(contentsDir, "Resources");
+        if (Directory.Exists(bundleResourcesDir))
+        {
+            resourcesDir = bundleResourcesDir;
+            var bundleLocalesDir = Path.Combine(bundleResourcesDir, "locales");
+            if (Directory.Exists(bundleLocalesDir))
+            {
+                localesDir = bundleLocalesDir;
+            }
+        }
+
+        var bundleHelperPath = Path.Combine(
+            contentsDir,
+            "Frameworks",
+            "cef_subprocess Helper.app",
+            "Contents",
+            "MacOS",
+            "cef_subprocess Helper");
+
+        if (File.Exists(bundleHelperPath))
+        {
+            subprocessPath = bundleHelperPath;
+        }
+        else
+        {
+            var flatHelperPath = Path.Combine(baseDir, "cef_subprocess Helper.app", "Contents", "MacOS", "cef_subprocess Helper");
+            if (File.Exists(flatHelperPath))
+            {
+                subprocessPath = flatHelperPath;
+            }
+        }
+    }
+
     string[] argv = [Environment.ProcessPath!];
 
-    return _RunWithSubprocess(argv.Length, argv, baseDir, baseDir, cacheDir, subprocessPath);
+    return _RunWithSubprocess(argv.Length, argv, resourcesDir, localesDir, cacheDir, subprocessPath);
 }
 }

@@ -106,7 +106,7 @@ jobs:
           mkdir -p native/stage/buildTransitive/osx-x64
 
           cp -a native/build/macos/libCefNative.dylib native/stage/runtimes/osx-x64/native/
-          cp -a native/build/macos/cef_subprocess native/stage/runtimes/osx-x64/native/
+          cp -a "native/build/macos/cef_subprocess Helper.app" native/stage/runtimes/osx-x64/native/
 
           # Zip the entire framework bundle so NuGet doesn't see individual .lproj files
           # Place the zip in buildTransitive so it is imported but not copied as a runtime asset.

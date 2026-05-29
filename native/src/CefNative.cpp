@@ -93,6 +93,38 @@ std::string DefaultPath(const char* value, const std::string& fallback) {
     return fallback;
 }
 
+#if defined(__APPLE__)
+std::string ResolveMacSubprocessPath(const std::string& base_dir) {
+    const std::filesystem::path base_path(base_dir);
+    const std::string helper_bundle = "cef_subprocess Helper.app";
+    const std::string helper_binary = "cef_subprocess Helper";
+
+    const std::filesystem::path flat_candidate =
+            base_path / helper_bundle / "Contents" / "MacOS" / helper_binary;
+    if (std::filesystem::exists(flat_candidate)) {
+        return flat_candidate.string();
+    }
+
+    const std::filesystem::path framework_candidate =
+            base_path.parent_path() / "Frameworks" / helper_bundle / "Contents" / "MacOS" / helper_binary;
+    if (std::filesystem::exists(framework_candidate)) {
+        return framework_candidate.string();
+    }
+
+    return {};
+}
+
+std::string ResolveMacResourcesPath(const std::string& base_dir) {
+    const std::filesystem::path base_path(base_dir);
+    const std::filesystem::path contents_dir = base_path.parent_path();
+    const std::filesystem::path bundle_resources = contents_dir / "Resources";
+    if (std::filesystem::exists(bundle_resources)) {
+        return bundle_resources.string();
+    }
+    return base_dir;
+}
+#endif
+
 void SetSettingPath(cef_string_t* target, const std::string& value) {
     if (!value.empty()) {
         CefString target_value(target);
@@ -188,6 +220,8 @@ CEF_NATIVE_EXPORT int CefNative_RunHelloWorldWithSubprocessPath(
         const char* locales_dir,
         const char* cache_dir,
         const char* browser_subprocess_path) {
+    CefRefPtr<HelloApp> app(new HelloApp());
+
 #if defined(__linux__)
     if (!EnsureLibcefLoaded()) {
         return -1;
@@ -200,15 +234,25 @@ CEF_NATIVE_EXPORT int CefNative_RunHelloWorldWithSubprocessPath(
     CefMainArgs main_args(argc, argv);
 #endif
 
-    int exit_code = CefExecuteProcess(main_args, nullptr, nullptr);
+    int exit_code = CefExecuteProcess(main_args, app.get(), nullptr);
     if (exit_code >= 0) {
         return exit_code;
     }
 
     const std::string exe_dir = GetExecutableDir();
+#if defined(__APPLE__)
+    const std::string resources_base = ResolveMacResourcesPath(exe_dir);
+    const std::string resources_path = DefaultPath(resources_dir, resources_base);
+#else
     const std::string resources_path = DefaultPath(resources_dir, exe_dir);
+#endif
+#if defined(__APPLE__)
+    const std::string locales_path =
+            DefaultPath(locales_dir, resources_path.empty() ? "" : resources_path + "/locales");
+#else
     const std::string locales_path =
             DefaultPath(locales_dir, exe_dir.empty() ? "" : exe_dir + "/locales");
+#endif
     const std::string cache_path =
             DefaultPath(cache_dir, exe_dir.empty() ? "" : exe_dir + "/cef_cache");
 
@@ -225,6 +269,12 @@ CEF_NATIVE_EXPORT int CefNative_RunHelloWorldWithSubprocessPath(
     if (browser_subprocess_path && browser_subprocess_path[0] != '\0') {
         SetSettingPath(&settings.browser_subprocess_path, browser_subprocess_path);
     } else {
+#if defined(__APPLE__)
+        const std::string helper_path = ResolveMacSubprocessPath(exe_dir.empty() ? resources_path : exe_dir);
+        if (!helper_path.empty()) {
+            SetSettingPath(&settings.browser_subprocess_path, helper_path);
+        }
+#else
         std::string helper_name = "cef_subprocess";
 #if defined(_WIN32)
         helper_name += ".exe";
@@ -234,9 +284,8 @@ CEF_NATIVE_EXPORT int CefNative_RunHelloWorldWithSubprocessPath(
             std::string candidate = base_dir + "/" + helper_name;
             SetSettingPath(&settings.browser_subprocess_path, candidate);
         }
+#endif
     }
-
-    CefRefPtr<HelloApp> app(new HelloApp());
 
     if (!CefInitialize(main_args, settings, app.get(), nullptr)) {
         return CefGetExitCode();

@@ -69,6 +69,14 @@ SET_LIBRARY_TARGET_PROPERTIES(CefNative)
 # Subprocess helper executable used when the host is not a native exe
 add_executable(cef_subprocess src/cef_subprocess_main.cc)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set_target_properties(cef_subprocess PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_BUNDLE_NAME "cef_subprocess Helper"
+        OUTPUT_NAME "cef_subprocess Helper"
+    )
+endif()
+
 target_include_directories(cef_subprocess PRIVATE
     ${CEF_ROOT}
     src
