@@ -22,6 +22,9 @@
 #include "include/views/cef_browser_view.h"
 #include "include/views/cef_window.h"
 #include "include/wrapper/cef_helpers.h"
+#if defined(__APPLE__)
+#include "include/wrapper/cef_library_loader.h"
+#endif
 
 namespace
 {
@@ -273,7 +276,15 @@ extern "C"
         const char *cache_dir,
         const char *browser_subprocess_path)
     {
-        CefRefPtr<HelloApp> app(new HelloApp());
+#if defined(__APPLE__)
+        // Required when using libcef_dll_wrapper with the macOS framework.
+        // Without this, wrapper dispatch stubs can call a null function pointer.
+        CefScopedLibraryLoader library_loader;
+        if (!library_loader.LoadInMain())
+        {
+            return 1;
+        }
+#endif
 
 #if defined(__linux__)
         if (!EnsureLibcefLoaded())
@@ -288,15 +299,16 @@ extern "C"
         CefMainArgs main_args(argc, argv);
 #endif
 
-#if defined(__APPLE__)
-    int exit_code = CefExecuteProcess(main_args, app.get(), nullptr);
-#else
-    int exit_code = CefExecuteProcess(main_args, app.get(), nullptr);
-#endif
+        // This app only uses browser-process callbacks. Keep the subprocess
+        // probe free of application state and create the app object only if we
+        // are actually initializing the browser process.
+        int exit_code = CefExecuteProcess(main_args, nullptr, nullptr);
         if (exit_code >= 0)
         {
             return exit_code;
         }
+
+        CefRefPtr<HelloApp> app(new HelloApp());
 
         const std::string exe_dir = GetExecutableDir();
 #if defined(__APPLE__)
