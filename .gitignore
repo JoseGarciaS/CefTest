@@ -17,3 +17,5 @@ native/stage/
 /dotnet/CefNative.Test/dotnet/CefNative.Test/obj
 /dotnet/CefNative.Test/obj
 /unused
+/.vscode
+/temp

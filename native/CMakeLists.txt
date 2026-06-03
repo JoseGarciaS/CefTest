@@ -1,105 +1,100 @@
-cmake_minimum_required(VERSION 3.20)
-project(CefTest LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.15)
+project(CefTest)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
+# Linux needs RPATH so it can find libcef.so next to the executable
 if(UNIX AND NOT APPLE)
     set(CMAKE_BUILD_RPATH "$ORIGIN")
     set(CMAKE_INSTALL_RPATH "$ORIGIN")
 endif()
 
+# Platform-specific CEF path, can be overridden with -DCEF_ROOT=...
 if(NOT CEF_ROOT)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(CEF_ROOT "/tmp/cef/linux")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        set(CEF_ROOT "C:/cef/windows")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        set(CEF_ROOT "/tmp/cef/macos")
-    endif()
+    message(FATAL_ERROR "CEF_ROOT not set. Use -DCEF_ROOT=/path/to/cef")
 endif()
 
+# Use CEF's own CMake integration instead of add_subdirectory
 list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
-
 find_package(CEF REQUIRED)
-
 add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(PLATFORM_HANDLER_SRCS src/simple_handler_linux.cc)
-    set(CEF_LIB_TARGET "$<$<CONFIG:Debug>:${CEF_LIB_DEBUG}>$<$<NOT:$<CONFIG:Debug>>:${CEF_LIB_RELEASE}>")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(PLATFORM_HANDLER_SRCS src/simple_handler_win.cc)
-    set(CEF_LIB_TARGET "$<$<CONFIG:Debug>:${CEF_LIB_DEBUG}>$<$<NOT:$<CONFIG:Debug>>:${CEF_LIB_RELEASE}>")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(PLATFORM_HANDLER_SRCS src/simple_handler_mac.mm)
+# Platform-specific CEF library to link against
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CEF_LIB_TARGET "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
+else()
+    set(CEF_LIB_TARGET "$<$<CONFIG:Debug>:${CEF_LIB_DEBUG}>$<$<NOT:$<CONFIG:Debug>>:${CEF_LIB_RELEASE}>")
 endif()
 
-
-
-# Shared library
-add_library(CefNative SHARED
-    src/CefNative.cpp
-    src/simple_handler.cc
-    ${PLATFORM_HANDLER_SRCS}
+# Main browser process executable
+add_executable(CefTest2
+    src/CefMain.cpp
+    src/CefApp.cpp
+    src/CefClient.cpp
+    src/CefApp.hpp
+    src/CefClient.hpp
 )
 
+target_include_directories(CefTest2 PRIVATE
+    ${CEF_ROOT}
+    ${CEF_ROOT}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(CefTest2
+    libcef_dll_wrapper
+    ${CEF_STANDARD_LIBS}
+    ${CEF_LIB_TARGET}
+)
+
+if (WIN32)
+    target_compile_definitions(CefTest2 PRIVATE NOMINMAX)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(CefNative PROPERTIES
+    set_target_properties(CefTest2 PROPERTIES
         MACOSX_RPATH TRUE
         BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "@loader_path/../Frameworks"
     )
 endif()
 
-target_include_directories(CefNative PRIVATE
-    ${CEF_ROOT}
-    src
+# ------------------------------------------------------------------
+# Subprocess executable
+add_executable(SubCefTest2
+    src/CefSubprocessHelper.cpp
 )
 
-# On Windows, prevent min/max macro collisions with std::min/std::max
-if (WIN32)
-    target_compile_definitions(CefNative PRIVATE NOMINMAX)
-endif()
+target_include_directories(SubCefTest2 PRIVATE
+    ${CEF_ROOT}
+    ${CEF_ROOT}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
-target_link_libraries(CefNative PRIVATE
+target_link_libraries(SubCefTest2
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS}
     ${CEF_LIB_TARGET}
 )
 
-SET_LIBRARY_TARGET_PROPERTIES(CefNative)
-
-# Subprocess helper executable used when the host is not a native exe
-add_executable(cef_subprocess src/cef_subprocess_main.cc)
+if (WIN32)
+    target_compile_definitions(SubCefTest2 PRIVATE NOMINMAX)
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(cef_subprocess PROPERTIES
+    set_target_properties(SubCefTest2 PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_BUNDLE_NAME "cef_subprocess Helper"
-        OUTPUT_NAME "cef_subprocess Helper"
+        MACOSX_BUNDLE_BUNDLE_NAME "SubCefTest2 Helper"
+        OUTPUT_NAME "SubCefTest2 Helper"
+        MACOSX_RPATH TRUE
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "@loader_path/../../../Frameworks"
     )
 endif()
 
-target_include_directories(cef_subprocess PRIVATE
-    ${CEF_ROOT}
-    src
-)
-
-if (WIN32)
-    target_compile_definitions(cef_subprocess PRIVATE NOMINMAX)
-endif()
-
-target_link_libraries(cef_subprocess PRIVATE
-    libcef_dll_wrapper
-    ${CEF_STANDARD_LIBS}
-    ${CEF_LIB_TARGET}
-)
-
-add_custom_command(TARGET cef_subprocess POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:cef_subprocess> ${CMAKE_CURRENT_BINARY_DIR}
-)
