@@ -61,8 +61,10 @@ extern "C"
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 CefString(&settings.resources_dir_path).FromString(lib_path);
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
+                CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
 
                 std::cout << lib_path << std::endl;
+                std::cout << subprocess_path << std::endl;
 
                 std::cout << "end" << std::endl;
 
