@@ -1,144 +1,27 @@
 <Project>
-  <!-- Extract for local build/run into the build output directory -->
-  <PropertyGroup>
-    <!-- ZIP lives in buildTransitive so it is imported but not copied as a runtime asset -->
-    <CefFrameworkZip_Path>$(MSBuildThisFileDirectory)osx-x64\cef_framework.zip</CefFrameworkZip_Path>
-    <CefMacAppBundleName Condition="'$(CefMacAppBundleName)' == ''">$(AssemblyName)</CefMacAppBundleName>
-  </PropertyGroup>
 
-  <Target Name="ExtractCefMacFrameworkOnBuild"
-          AfterTargets="Build"
-          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(CefFrameworkZip_Path)')">
-    <Message Importance="Low" Text="Extracting CEF framework to $(TargetDir)" />
-    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_Path)&quot; &quot;$(TargetDir)&quot;"
-          Condition="Exists('/usr/bin/ditto')" />
-
-    <!-- Windows fallback: use PowerShell Expand-Archive if ditto is unavailable -->
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_Path)' -DestinationPath '$(TargetDir)' -Force&quot;"
-          Condition="'$(OS)' == 'Windows_NT'" />
-
-    <!-- Generic fallback for Unix-like systems without ditto: unzip -->
-    <Exec Command="unzip -o &quot;$(CefFrameworkZip_Path)&quot; -d &quot;$(TargetDir)&quot;"
-          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
-
-    <Delete Files="$(TargetDir)cef_framework.zip" />
-  </Target>
-
-  <!-- Ensure framework is present in publish output before publish packages files -->
-  <Target Name="ExtractCefMacFrameworkOnPublish"
-          BeforeTargets="Publish"
-          Condition="'$(RuntimeIdentifier)' == 'osx-x64' and Exists('$(CefFrameworkZip_Path)')">
-    <Message Importance="Low" Text="Extracting CEF framework to $(PublishDir)" />
-    <MakeDir Directories="$(PublishDir)" Condition="'$(PublishDir)' != '' and !Exists('$(PublishDir)')" />
-    <Delete Files="$(PublishDir)cef_framework.zip" />
-
-    <Exec Command="ditto -x -k &quot;$(CefFrameworkZip_Path)&quot; &quot;$(PublishDir)&quot;"
-          Condition="Exists('/usr/bin/ditto')" />
-
-    <!-- Windows fallback: use PowerShell Expand-Archive if ditto is unavailable -->
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Expand-Archive -LiteralPath '$(CefFrameworkZip_Path)' -DestinationPath '$(PublishDir)' -Force&quot;"
-          Condition="'$(OS)' == 'Windows_NT'" />
-
-    <!-- Generic fallback for Unix-like systems without ditto: unzip -->
-    <Exec Command="unzip -o &quot;$(CefFrameworkZip_Path)&quot; -d &quot;$(PublishDir)&quot;"
-          Condition="'$(OS)' != 'Windows_NT' and !Exists('/usr/bin/ditto')" />
-  </Target>
-
-      <Target Name="CreateCefMacHelperAppOnPublish"
-                              AfterTargets="Publish"
-                              Condition="('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(PublishDir)' != ''">
-            <PropertyGroup>
-                  <_CefMacHelperName>cef_subprocess Helper</_CefMacHelperName>
-                  <_CefMacHelperBinary>$(PublishDir)$(_CefMacHelperName)</_CefMacHelperBinary>
-                  <_CefMacHelperAppDir>$(PublishDir)$(_CefMacHelperName).app</_CefMacHelperAppDir>
-                  <_CefMacHelperContentsDir>$(_CefMacHelperAppDir)/Contents</_CefMacHelperContentsDir>
-                  <_CefMacHelperMacOSDir>$(_CefMacHelperContentsDir)/MacOS</_CefMacHelperMacOSDir>
-            </PropertyGroup>
-
-            <ItemGroup>
-                  <_CefMacHelperInfoPlistLines Include="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="&lt;plist version=&quot;1.0&quot;&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="&lt;dict&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundleExecutable&lt;/key&gt;&lt;string&gt;$(_CefMacHelperName)&lt;/string&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundleIdentifier&lt;/key&gt;&lt;string&gt;com.example.cef_subprocess&lt;/string&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundleName&lt;/key&gt;&lt;string&gt;$(_CefMacHelperName)&lt;/string&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="  &lt;key&gt;CFBundlePackageType&lt;/key&gt;&lt;string&gt;APPL&lt;/string&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="&lt;/dict&gt;" />
-                  <_CefMacHelperInfoPlistLines Include="&lt;/plist&gt;" />
-            </ItemGroup>
-
-            <RemoveDir Directories="$(_CefMacHelperAppDir)" Condition="Exists('$(_CefMacHelperAppDir)')" />
-            <MakeDir Directories="$(_CefMacHelperMacOSDir)" Condition="Exists('$(_CefMacHelperBinary)')" />
-            <Copy SourceFiles="$(_CefMacHelperBinary)" DestinationFiles="$(_CefMacHelperMacOSDir)/$(_CefMacHelperName)" Condition="Exists('$(_CefMacHelperBinary)')" />
-            <WriteLinesToFile File="$(_CefMacHelperContentsDir)/Info.plist"
-                                                                  Overwrite="true"
-                                                                  Lines="@(_CefMacHelperInfoPlistLines)"
-                                                                  Condition="Exists('$(_CefMacHelperBinary)')" />
-            <Exec Command="chmod +x &quot;$(_CefMacHelperMacOSDir)/$(_CefMacHelperName)&quot;"
-                              Condition="Exists('$(_CefMacHelperBinary)') and Exists('/bin/chmod')" />
-      </Target>
-
-  <Target Name="CreateCefMacAppBundleOnPublish"
-        AfterTargets="Publish"
-        DependsOnTargets="CreateCefMacHelperAppOnPublish"
-          Condition="('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64') and '$(PublishDir)' != ''">
-    <PropertyGroup>
-      <_CefMacAppDir>$(PublishDir)$(CefMacAppBundleName).app</_CefMacAppDir>
-      <_CefMacContentsDir>$(_CefMacAppDir)/Contents</_CefMacContentsDir>
-      <_CefMacMacOSDir>$(_CefMacContentsDir)/MacOS</_CefMacMacOSDir>
-      <_CefMacFrameworksDir>$(_CefMacContentsDir)/Frameworks</_CefMacFrameworksDir>
-      <_CefMacResourcesDir>$(_CefMacContentsDir)/Resources</_CefMacResourcesDir>
-      <_CefMacHostExecutable>$(AssemblyName)</_CefMacHostExecutable>
-    </PropertyGroup>
-
-    <Message Importance="Low" Text="Assembling macOS app bundle at $(_CefMacAppDir)" />
-    <RemoveDir Directories="$(_CefMacAppDir)" Condition="Exists('$(_CefMacAppDir)')" />
-    <MakeDir Directories="$(_CefMacMacOSDir);$(_CefMacFrameworksDir);$(_CefMacResourcesDir)" />
-
-            <ItemGroup>
-                  <_CefMacInfoPlistLines Include="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" />
-                  <_CefMacInfoPlistLines Include="&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;" />
-                  <_CefMacInfoPlistLines Include="&lt;plist version=&quot;1.0&quot;&gt;" />
-                  <_CefMacInfoPlistLines Include="&lt;dict&gt;" />
-                  <_CefMacInfoPlistLines Include="  &lt;key&gt;CFBundleExecutable&lt;/key&gt;&lt;string&gt;$(_CefMacHostExecutable)&lt;/string&gt;" />
-                  <_CefMacInfoPlistLines Include="  &lt;key&gt;CFBundleIdentifier&lt;/key&gt;&lt;string&gt;com.example.$(AssemblyName)&lt;/string&gt;" />
-                  <_CefMacInfoPlistLines Include="  &lt;key&gt;CFBundleName&lt;/key&gt;&lt;string&gt;$(CefMacAppBundleName)&lt;/string&gt;" />
-                  <_CefMacInfoPlistLines Include="  &lt;key&gt;CFBundlePackageType&lt;/key&gt;&lt;string&gt;APPL&lt;/string&gt;" />
-                  <_CefMacInfoPlistLines Include="&lt;/dict&gt;" />
-                  <_CefMacInfoPlistLines Include="&lt;/plist&gt;" />
-            </ItemGroup>
-
-    <WriteLinesToFile
-      File="$(_CefMacContentsDir)/Info.plist"
-      Overwrite="true"
-                  Lines="@(_CefMacInfoPlistLines)" />
-
+  <Target Name="CopyCefNativeToOutput" AfterTargets="Build">
     <ItemGroup>
-      <_CefMacHostFiles Include="$(PublishDir)$(AssemblyName)" />
-      <_CefMacHostFiles Include="$(PublishDir)$(AssemblyName).dll" Condition="Exists('$(PublishDir)$(AssemblyName).dll')" />
-      <_CefMacHostFiles Include="$(PublishDir)$(AssemblyName).deps.json" Condition="Exists('$(PublishDir)$(AssemblyName).deps.json')" />
-      <_CefMacHostFiles Include="$(PublishDir)$(AssemblyName).runtimeconfig.json" Condition="Exists('$(PublishDir)$(AssemblyName).runtimeconfig.json')" />
-      <_CefMacHostFiles Include="$(PublishDir)$(AssemblyName).pdb" Condition="Exists('$(PublishDir)$(AssemblyName).pdb')" />
-      <_CefMacHostFiles Include="$(PublishDir)CefManaged.dll" Condition="Exists('$(PublishDir)CefManaged.dll')" />
-      <_CefMacHostFiles Include="$(PublishDir)libCefNative.dylib" Condition="Exists('$(PublishDir)libCefNative.dylib')" />
+      <_CefNativeAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\*"
+                        Condition="'$(RuntimeIdentifier)' != ''" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(_CefMacHostFiles)" DestinationFolder="$(_CefMacMacOSDir)" SkipUnchangedFiles="true" />
-
-    <Exec Command="ditto &quot;$(PublishDir)Chromium Embedded Framework.framework&quot; &quot;$(_CefMacFrameworksDir)/Chromium Embedded Framework.framework&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(PublishDir)Chromium Embedded Framework.framework')" />
-
-    <Exec Command="ditto &quot;$(PublishDir)cef_subprocess Helper.app&quot; &quot;$(_CefMacFrameworksDir)/cef_subprocess Helper.app&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(PublishDir)cef_subprocess Helper.app')" />
-
-    <Exec Command="ditto &quot;$(PublishDir)Chromium Embedded Framework.framework/Resources&quot; &quot;$(_CefMacResourcesDir)&quot;"
-          Condition="Exists('/usr/bin/ditto') and Exists('$(PublishDir)Chromium Embedded Framework.framework/Resources')" />
-
-    <Exec Command="unzip -q -o &quot;$(PublishDir)cef_framework.zip&quot; -d &quot;$(_CefMacResourcesDir)&quot;"
-          Condition="Exists('$(PublishDir)cef_framework.zip') and !Exists('/usr/bin/ditto')" />
-
-    <Exec Command="chmod -R u+w,go+rX &quot;$(_CefMacAppDir)&quot;"
-          Condition="Exists('/bin/chmod')" />
+    <Copy SourceFiles="@(_CefNativeAssets)"
+          DestinationFolder="$(OutputPath)"
+          SkipUnchangedFiles="true"
+          Condition="'@(_CefNativeAssets)' != ''" />
   </Target>
+
+  <Target Name="CopyCefNativeToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <_CefNativePublishAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\*"
+                               Condition="'$(RuntimeIdentifier)' != ''" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_CefNativePublishAssets)"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="true"
+          Condition="'@(_CefNativePublishAssets)' != ''" />
+  </Target>
+
 </Project>

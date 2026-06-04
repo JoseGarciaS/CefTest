@@ -32,32 +32,33 @@ else()
 endif()
 
 # Main browser process executable
-add_executable(CefTest2
-    src/CefMain.cpp
+add_library(CefProcess SHARED
+    src/CefNative.cpp
+    src/CefNative.hpp
     src/CefApp.cpp
     src/CefClient.cpp
     src/CefApp.hpp
     src/CefClient.hpp
 )
 
-target_include_directories(CefTest2 PRIVATE
+target_include_directories(CefProcess PRIVATE
     ${CEF_ROOT}
     ${CEF_ROOT}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(CefTest2
+target_link_libraries(CefProcess
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS}
     ${CEF_LIB_TARGET}
 )
 
 if (WIN32)
-    target_compile_definitions(CefTest2 PRIVATE NOMINMAX)
+    target_compile_definitions(CefProcess PRIVATE NOMINMAX)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(CefTest2 PROPERTIES
+    set_target_properties(CefProcess PROPERTIES
         MACOSX_RPATH TRUE
         BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "@loader_path/../Frameworks"
@@ -66,32 +67,32 @@ endif()
 
 # ------------------------------------------------------------------
 # Subprocess executable
-add_executable(SubCefTest2
+add_executable(CefSubprocess
     src/CefSubprocessHelper.cpp
 )
 
-target_include_directories(SubCefTest2 PRIVATE
+target_include_directories(CefSubprocess PRIVATE
     ${CEF_ROOT}
     ${CEF_ROOT}/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(SubCefTest2
+target_link_libraries(CefSubprocess
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS}
     ${CEF_LIB_TARGET}
 )
 
 if (WIN32)
-    target_compile_definitions(SubCefTest2 PRIVATE NOMINMAX)
+    target_compile_definitions(CefSubprocess PRIVATE NOMINMAX)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(SubCefTest2 PROPERTIES
+    set_target_properties(CefSubprocess PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_BUNDLE_NAME "SubCefTest2 Helper"
-        OUTPUT_NAME "SubCefTest2 Helper"
+        MACOSX_BUNDLE_BUNDLE_NAME "CefSubprocess Helper"
+        OUTPUT_NAME "CefSubprocess Helper"
         MACOSX_RPATH TRUE
         BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "@loader_path/../../../Frameworks"

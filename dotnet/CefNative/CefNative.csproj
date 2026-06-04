@@ -2,19 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <AssemblyName>CefManaged</AssemblyName>
     <RootNamespace>CefNative</RootNamespace>
     <!-- Version is supplied by CI at pack time: /p:Version=1.0.${{ github.run_number }} -->
-    <Authors>Amongus</Authors>
+    <Authors>JoseGarciaS</Authors>
     <Description>Cross-platform CEF wrapper for .NET</Description>
     <PackageId>CefNative</PackageId>
     <PackageProjectUrl>https://github.com/JoseGarciaS/CefTest</PackageProjectUrl>
     <RepositoryUrl>https://github.com/JoseGarciaS/CefTest</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

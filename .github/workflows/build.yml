@@ -1,0 +1,175 @@
+name: Build CEF Wrapper
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache CEF
+        uses: actions/cache@v4
+        id: cache-cef-linux
+        with:
+          path: /tmp/cef/linux
+          key: cef-148.0.9-linux64
+
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y cmake ninja-build libgtk-3-dev libnss3 libasound2t64 libxss1
+
+      - name: Download CEF
+        if: steps.cache-cef-linux.outputs.cache-hit != 'true'
+        run: |
+          wget -q "https://cef-builds.spotifycdn.com/cef_binary_148.0.9+g0d9d52a+chromium-148.0.7778.180_linux64_minimal.tar.bz2" -O cef_linux.tar.bz2
+          mkdir -p /tmp/cef/linux
+          tar -xjf cef_linux.tar.bz2 -C /tmp/cef/linux --strip-components=1
+
+      - name: Build
+        run: |
+          cmake -B native/build/linux -S native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCEF_ROOT=/tmp/cef/linux
+          cmake --build native/build/linux --target SubCefTest2 CefProcess
+
+      - name: Stage runtime
+        run: |
+          mkdir -p native/stage/runtimes/linux-x64/native
+          cp -a /tmp/cef/linux/Release/. native/stage/runtimes/linux-x64/native/
+          cp -a /tmp/cef/linux/Resources/. native/stage/runtimes/linux-x64/native/
+          cp native/build/linux/libCefProcess.so native/stage/runtimes/linux-x64/native/
+          cp native/build/linux/SubCefTest2 native/stage/runtimes/linux-x64/native/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-linux-x64
+          path: native/stage/runtimes/linux-x64/native
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache CEF
+        uses: actions/cache@v4
+        id: cache-cef-windows
+        with:
+          path: C:\cef\windows
+          key: cef-148.0.9-win64
+
+      - name: Download CEF
+        if: steps.cache-cef-windows.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest "https://cef-builds.spotifycdn.com/cef_binary_148.0.9+g0d9d52a+chromium-148.0.7778.180_windows64_minimal.tar.bz2" -OutFile cef_windows.tar.bz2
+          New-Item -ItemType Directory -Force C:\cef\windows | Out-Null
+          tar -xjf cef_windows.tar.bz2 -C C:\cef\windows --strip-components=1
+
+      - name: Build
+        run: |
+          cmake -B native/build/windows -S native -DCEF_ROOT=C:\cef\windows
+          cmake --build native/build/windows --target SubCefTest2 CefProcess --config Release
+
+      - name: Stage runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force native\stage\runtimes\win-x64\native | Out-Null
+          Copy-Item -Recurse -Force C:\cef\windows\Release\* native\stage\runtimes\win-x64\native\
+          Copy-Item -Recurse -Force C:\cef\windows\Resources\* native\stage\runtimes\win-x64\native\
+          Copy-Item -Force native\build\windows\Release\CefProcess.dll native\stage\runtimes\win-x64\native\
+          Copy-Item -Force native\build\windows\Release\SubCefTest2.exe native\stage\runtimes\win-x64\native\
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-win-x64
+          path: native/stage/runtimes/win-x64/native
+
+  build-macos:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache CEF
+        uses: actions/cache@v4
+        id: cache-cef-mac
+        with:
+          path: /tmp/cef/macos
+          key: cef-148.0.9-macosx64
+
+      - name: Install dependencies
+        run: brew install cmake ninja wget
+
+      - name: Download CEF
+        if: steps.cache-cef-mac.outputs.cache-hit != 'true'
+        run: |
+          wget -q "https://cef-builds.spotifycdn.com/cef_binary_148.0.9+g0d9d52a+chromium-148.0.7778.180_macosx64_minimal.tar.bz2" -O cef_macos.tar.bz2
+          mkdir -p /tmp/cef/macos
+          tar -xjf cef_macos.tar.bz2 -C /tmp/cef/macos --strip-components=1
+
+      - name: Build
+        run: |
+          cmake -B native/build/macos -S native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCEF_ROOT=/tmp/cef/macos
+          cmake --build native/build/macos --target SubCefTest2 CefProcess
+
+      - name: Stage runtime
+        run: |
+          mkdir -p native/stage/runtimes/osx-x64/native
+          cp native/build/macos/libCefProcess.dylib native/stage/runtimes/osx-x64/native/
+          cp -a "native/build/macos/SubCefTest2 Helper.app" native/stage/runtimes/osx-x64/native/
+          ditto -c -k --keepParent "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
+            native/stage/runtimes/osx-x64/native/cef_framework.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-osx-x64
+          path: native/stage/runtimes/osx-x64/native
+
+  pack-nuget:
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-windows, build-macos]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: runtime-linux-x64
+          path: native/stage/runtimes/linux-x64/native
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: runtime-win-x64
+          path: native/stage/runtimes/win-x64/native
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: runtime-osx-x64
+          path: native/stage/runtimes/osx-x64/native
+
+      - name: Pack
+        run: |
+          cd dotnet/CefNative
+          dotnet pack -c Release -o ../../artifacts /p:Version=1.0.${{ github.run_number }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts/*.nupkg
+
+      - name: Publish to GitHub Packages
+        run: |
+          dotnet nuget push artifacts/*.nupkg \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --skip-duplicate
