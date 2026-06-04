@@ -36,7 +36,7 @@ jobs:
           cmake -B native/build/linux -S native -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCEF_ROOT=/tmp/cef/linux
-          cmake --build native/build/linux --target SubCefTest2 CefProcess
+          cmake --build native/build/linux --target CefSubprocess CefProcess
 
       - name: Stage runtime
         run: |
@@ -44,7 +44,7 @@ jobs:
           cp -a /tmp/cef/linux/Release/. native/stage/runtimes/linux-x64/native/
           cp -a /tmp/cef/linux/Resources/. native/stage/runtimes/linux-x64/native/
           cp native/build/linux/libCefProcess.so native/stage/runtimes/linux-x64/native/
-          cp native/build/linux/SubCefTest2 native/stage/runtimes/linux-x64/native/
+          cp native/build/linux/CefSubprocess native/stage/runtimes/linux-x64/native/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -73,7 +73,7 @@ jobs:
       - name: Build
         run: |
           cmake -B native/build/windows -S native -DCEF_ROOT=C:\cef\windows
-          cmake --build native/build/windows --target SubCefTest2 CefProcess --config Release
+          cmake --build native/build/windows --target CefSubprocess CefProcess --config Release
 
       - name: Stage runtime
         shell: pwsh
@@ -82,7 +82,7 @@ jobs:
           Copy-Item -Recurse -Force C:\cef\windows\Release\* native\stage\runtimes\win-x64\native\
           Copy-Item -Recurse -Force C:\cef\windows\Resources\* native\stage\runtimes\win-x64\native\
           Copy-Item -Force native\build\windows\Release\CefProcess.dll native\stage\runtimes\win-x64\native\
-          Copy-Item -Force native\build\windows\Release\SubCefTest2.exe native\stage\runtimes\win-x64\native\
+          Copy-Item -Force native\build\windows\Release\CefSubprocess.exe native\stage\runtimes\win-x64\native\
 
       - uses: actions/upload-artifact@v4
         with:
@@ -116,13 +116,13 @@ jobs:
           cmake -B native/build/macos -S native -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCEF_ROOT=/tmp/cef/macos
-          cmake --build native/build/macos --target SubCefTest2 CefProcess
+          cmake --build native/build/macos --target CefSubprocess CefProcess
 
       - name: Stage runtime
         run: |
           mkdir -p native/stage/runtimes/osx-x64/native
           cp native/build/macos/libCefProcess.dylib native/stage/runtimes/osx-x64/native/
-          cp -a "native/build/macos/SubCefTest2 Helper.app" native/stage/runtimes/osx-x64/native/
+          cp -a "native/build/macos/CefSubprocess Helper.app" native/stage/runtimes/osx-x64/native/
           ditto -c -k --keepParent "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
             native/stage/runtimes/osx-x64/native/cef_framework.zip
 
