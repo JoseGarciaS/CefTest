@@ -57,19 +57,25 @@ extern "C"
 #endif
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
-                CefString(&settings.resources_dir_path).FromString(lib_path);
-                CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
                 CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
+
+#if defined(__APPLE__)
+#else
+                CefString(&settings.resources_dir_path).FromString(lib_path);
+                CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
+#endif
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
 
                 // Initialize CEF in the main process.
+                std::cout << "CEF initialization" << std::endl;
                 if (!CefInitialize(main_args, settings, app.get(), nullptr))
                 {
                         std::cout << "CEF initialization failed" << std::endl;
                         return 1;
                 }
+                std::cout << "CEF initialized correctly" << std::endl;
 
                 // Run the CEF message loop. This will block until CefQuitMessageLoop() is called.
                 CefRunMessageLoop();

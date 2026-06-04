@@ -61,7 +61,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set_target_properties(CefProcess PROPERTIES
         MACOSX_RPATH TRUE
         BUILD_WITH_INSTALL_RPATH TRUE
-        INSTALL_RPATH "@loader_path/../Frameworks"
+        INSTALL_RPATH "@loader_path/Frameworks"
     )
 endif()
 
