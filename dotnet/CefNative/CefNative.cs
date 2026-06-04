@@ -15,7 +15,7 @@ public static class Cef
     }
 
     [DllImport(LibName, EntryPoint = "CefNative_Run")]
-    private static extern int _Run(int argc, IntPtr argv);
+    private static extern int _Run(int argc, IntPtr argv, string libDir);
     private static IntPtr ResolveLibrary(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (libraryName != LibName)
@@ -33,7 +33,7 @@ public static class Cef
 
     public static int Run()
     {
-        return _Run(0, IntPtr.Zero);
+        return _Run(0, IntPtr.Zero, AppContext.BaseDirectory);
     }
 }
 

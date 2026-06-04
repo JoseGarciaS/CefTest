@@ -10,5 +10,6 @@ extern "C"
 {
     CEF_NATIVE_EXPORT int CefNative_Run(
         int argc,
-        char **argv);
+        char **argv,
+        const char *lib_dir);
 }

@@ -1,7 +1,6 @@
 #include "include/cef_app.h"
 #include "include/cef_browser.h"
 #include "include/cef_client.h"
-#include "include/cef_command_line.h"
 #include <filesystem>
 #include "CefNative.hpp"
 #include "CefApp.hpp"
@@ -10,23 +9,16 @@
 #include "include/wrapper/cef_library_loader.h"
 #endif
 
-static std::string GetExecutableDir(int argc, char *argv[])
-{
-        CefRefPtr<CefCommandLine> cmd = CefCommandLine::CreateCommandLine();
 #if defined(_WIN32)
-        cmd->InitFromString(GetCommandLineW());
+#include <windows.h>
 #else
-        cmd->InitFromArgv(argc, argv);
+#include <dlfcn.h>
 #endif
-        return std::filesystem::path(cmd->GetProgram().ToString())
-            .parent_path()
-            .string();
-}
 
 // Program entry-point function.
 extern "C"
 {
-        CEF_NATIVE_EXPORT int CefNative_Run(int argc, char **argv)
+        CEF_NATIVE_EXPORT int CefNative_Run(int argc, char **argv, const char *lib_dir)
         {
 
 #if defined(__APPLE__)
@@ -53,15 +45,14 @@ extern "C"
                 CefSettings settings;
                 settings.no_sandbox = true;
 
-                // Specify the path for the sub-process executable.
-                const std::string exe_dir = GetExecutableDir(argc, argv);
+                const std::string lib_path(lib_dir);
 
 #if defined(_WIN32)
-                const std::string subprocess_path = exe_dir + "/CefSubprocess.exe";
+                const std::string subprocess_path = lib_path + "/CefSubprocess.exe";
 #elif defined(__APPLE__)
-                const std::string subprocess_path = exe_dir + "/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper";
+                const std::string subprocess_path = lib_path + "/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper";
 #else
-                const std::string subprocess_path = exe_dir + "/CefSubprocess";
+                const std::string subprocess_path = lib_path + "/CefSubprocess";
 #endif
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
