@@ -123,8 +123,9 @@ jobs:
           mkdir -p native/stage/runtimes/osx-x64/native
           cp native/build/macos/libCefProcess.dylib native/stage/runtimes/osx-x64/native/
           cp -a "native/build/macos/CefSubprocess Helper.app" native/stage/runtimes/osx-x64/native/
-          ditto -c -k --keepParent "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
-            native/stage/runtimes/osx-x64/native/cef_framework.zip
+          mkdir -p native/stage/runtimes/osx-x64/native/Frameworks
+          cp -a "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
+            native/stage/runtimes/osx-x64/native/Frameworks/
 
       - uses: actions/upload-artifact@v4
         with:
