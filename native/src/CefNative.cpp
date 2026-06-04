@@ -58,9 +58,16 @@ extern "C"
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess").string();
 #endif
 
+                CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
+                CefString(&settings.resources_dir_path).FromString(lib_path);
+                CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
+
+                std::cout << lib_path << std::endl;
+
                 std::cout << "end" << std::endl;
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
+                std::cout << "end_" << std::endl;
 
                 // Initialize CEF in the main process.
                 CefInitialize(main_args, settings, app.get(), nullptr);
