@@ -4,6 +4,7 @@
 #include <filesystem>
 #include "CefNative.hpp"
 #include "CefApp.hpp"
+#include <iostream>
 
 #if defined(__APPLE__)
 #include "include/wrapper/cef_library_loader.h"
@@ -45,26 +46,33 @@ extern "C"
                 CefSettings settings;
                 settings.no_sandbox = true;
 
-                const std::string lib_path(lib_dir);
+                std::cout << "begin" << std::endl;
+
+                const std::string lib_path = std::filesystem::path(lib_dir).string();
 
 #if defined(_WIN32)
-                const std::string subprocess_path = lib_path + "/CefSubprocess.exe";
+                const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess.exe").string();
 #elif defined(__APPLE__)
-                const std::string subprocess_path = lib_path + "/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper";
+                const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper").string();
 #else
-                const std::string subprocess_path = lib_path + "/CefSubprocess";
+                const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess").string();
 #endif
+
+                std::cout << "end" << std::endl;
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
 
                 // Initialize CEF in the main process.
                 CefInitialize(main_args, settings, app.get(), nullptr);
+                std::cout << "end2" << std::endl;
 
                 // Run the CEF message loop. This will block until CefQuitMessageLoop() is called.
                 CefRunMessageLoop();
+                std::cout << "end3" << std::endl;
 
                 // Shut down CEF.
                 CefShutdown();
+                std::cout << "end4" << std::endl;
 
                 return 0;
         }
