@@ -99,3 +99,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     )
 endif()
 
+if(UNIX AND NOT APPLE)
+    target_link_options(CefProcess PRIVATE -static-libstdc++ -static-libgcc)
+    target_link_options(CefSubprocess PRIVATE -static-libstdc++ -static-libgcc)
+endif()
