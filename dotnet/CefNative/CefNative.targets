@@ -2,24 +2,24 @@
 
   <Target Name="CopyCefNativeToOutput" AfterTargets="Build">
     <ItemGroup>
-      <_CefNativeAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\*"
+      <_CefNativeAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
                         Condition="'$(RuntimeIdentifier)' != ''" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_CefNativeAssets)"
-          DestinationFolder="$(OutputPath)"
+          DestinationFolder="$(OutputPath)%(RecursiveDir)"
           SkipUnchangedFiles="true"
           Condition="'@(_CefNativeAssets)' != ''" />
   </Target>
 
   <Target Name="CopyCefNativeToPublish" AfterTargets="Publish">
     <ItemGroup>
-      <_CefNativePublishAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\*"
+      <_CefNativePublishAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
                                Condition="'$(RuntimeIdentifier)' != ''" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_CefNativePublishAssets)"
-          DestinationFolder="$(PublishDir)"
+          DestinationFolder="$(PublishDir)%(RecursiveDir)"
           SkipUnchangedFiles="true"
           Condition="'@(_CefNativePublishAssets)' != ''" />
   </Target>

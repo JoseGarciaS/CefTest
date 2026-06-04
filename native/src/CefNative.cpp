@@ -66,22 +66,20 @@ extern "C"
                 std::cout << lib_path << std::endl;
                 std::cout << subprocess_path << std::endl;
 
-                std::cout << "end" << std::endl;
-
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
-                std::cout << "end_" << std::endl;
 
                 // Initialize CEF in the main process.
-                CefInitialize(main_args, settings, app.get(), nullptr);
-                std::cout << "end2" << std::endl;
+                if (!CefInitialize(main_args, settings, app.get(), nullptr))
+                {
+                        std::cout << "CEF initialization failed" << std::endl;
+                        return 1;
+                }
 
                 // Run the CEF message loop. This will block until CefQuitMessageLoop() is called.
                 CefRunMessageLoop();
-                std::cout << "end3" << std::endl;
 
                 // Shut down CEF.
                 CefShutdown();
-                std::cout << "end4" << std::endl;
 
                 return 0;
         }
