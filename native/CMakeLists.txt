@@ -58,10 +58,10 @@ if (WIN32)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(CefProcess PROPERTIES
+    set_target_properties(CefSubprocess PROPERTIES
         MACOSX_RPATH TRUE
         BUILD_WITH_INSTALL_RPATH TRUE
-        INSTALL_RPATH "@loader_path/Frameworks"
+        INSTALL_RPATH "@executable_path/../../../"
     )
 endif()
 
@@ -95,8 +95,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         OUTPUT_NAME "CefSubprocess Helper"
         MACOSX_RPATH TRUE
         BUILD_WITH_INSTALL_RPATH TRUE
-        INSTALL_RPATH "@loader_path/../../../Frameworks"
+        INSTALL_RPATH "@executable_path/../../../"
     )
+
+    target_link_options(CefSubprocess PRIVATE
+  "-Wl,-rpath,@executable_path/../../../"
+  "-Wl,-change,@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework,@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework"
+)
 endif()
 
 if(UNIX AND NOT APPLE)

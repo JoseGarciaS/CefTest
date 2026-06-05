@@ -35,13 +35,70 @@
   <!-- Mac -->
   <Target Name="ExtractCefNativeMacOSToOutput" AfterTargets="Build"
     Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+    <PropertyGroup>
+      <PackageZip>$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip</PackageZip>
+      <StagingDir>$(OutputPath)</StagingDir>
+      <SubprocessFramework>$(StagingDir)Chromium Embedded Framework.framework</SubprocessFramework>
+      <StagedFramework>$(StagingDir)Frameworks/Chromium Embedded Framework.framework</StagedFramework>
+      <MainFrameworkTarget>$(OutputPath)..$(DirectorySeparator)Frameworks</MainFrameworkTarget>
+    </PropertyGroup>
+
+    <!-- unzip (your existing behavior) -->
+    <Exec Condition="Exists('$(PackageZip)')"
+      Command="unzip -o &quot;$(PackageZip)&quot; -d &quot;$(StagingDir)&quot;" />
+
+    <!-- If framework was unpacked under Frameworks/, copy it up to the subprocess root -->
+    <Exec Condition="Exists('$(StagedFramework)') and !Exists('$(SubprocessFramework)')"
+      Command="cp -a &quot;$(StagedFramework)&quot; &quot;$(SubprocessFramework)&quot;" />
+
+    <!-- Ensure main-process Frameworks exists next to OutputPath and copy framework there -->
+    <MakeDir Directories="$(MainFrameworkTarget)" Condition="!Exists('$(MainFrameworkTarget)')" />
     <Exec
-      Command="unzip -o '$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip' -d '$(OutputPath)'" />
+      Condition="Exists('$(StagedFramework)') and !Exists('$(MainFrameworkTarget)/Chromium Embedded Framework.framework')"
+      Command="cp -a &quot;$(StagedFramework)&quot; &quot;$(MainFrameworkTarget)/Chromium Embedded Framework.framework&quot;" />
+
+    <!-- If framework was unpacked directly at output root, ensure main copy exists too -->
+    <Exec
+      Condition="Exists('$(SubprocessFramework)') and !Exists('$(MainFrameworkTarget)/Chromium Embedded Framework.framework')"
+      Command="cp -a &quot;$(SubprocessFramework)&quot; &quot;$(MainFrameworkTarget)/Chromium Embedded Framework.framework&quot;" />
+
+    <!-- quick warnings (non-fatal) -->
+    <Warning Condition="!Exists('$(SubprocessFramework)/Resources/icudtl.dat')"
+      Text="icudtl.dat missing in subprocess framework at $(SubprocessFramework)" />
+    <Warning
+      Condition="!Exists('$(MainFrameworkTarget)/Chromium Embedded Framework.framework/Resources/icudtl.dat')"
+      Text="icudtl.dat missing in main framework at $(MainFrameworkTarget)/Chromium Embedded Framework.framework" />
   </Target>
 
   <Target Name="ExtractCefNativeMacOSToPublish" AfterTargets="Publish"
     Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+    <PropertyGroup>
+      <PackageZip>$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip</PackageZip>
+      <StagingDir>$(PublishDir)</StagingDir>
+      <SubprocessFramework>$(StagingDir)Chromium Embedded Framework.framework</SubprocessFramework>
+      <StagedFramework>$(StagingDir)Frameworks/Chromium Embedded Framework.framework</StagedFramework>
+      <MainFrameworkTarget>$(PublishDir)..$(DirectorySeparator)Frameworks</MainFrameworkTarget>
+    </PropertyGroup>
+
+    <Exec Condition="Exists('$(PackageZip)')"
+      Command="unzip -o &quot;$(PackageZip)&quot; -d &quot;$(StagingDir)&quot;" />
+
+    <Exec Condition="Exists('$(StagedFramework)') and !Exists('$(SubprocessFramework)')"
+      Command="cp -a &quot;$(StagedFramework)&quot; &quot;$(SubprocessFramework)&quot;" />
+
+    <MakeDir Directories="$(MainFrameworkTarget)" Condition="!Exists('$(MainFrameworkTarget)')" />
     <Exec
-      Command="unzip -o '$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip' -d '$(PublishDir)'" />
+      Condition="Exists('$(StagedFramework)') and !Exists('$(MainFrameworkTarget)/Chromium Embedded Framework.framework')"
+      Command="cp -a &quot;$(StagedFramework)&quot; &quot;$(MainFrameworkTarget)/Chromium Embedded Framework.framework&quot;" />
+
+    <Exec
+      Condition="Exists('$(SubprocessFramework)') and !Exists('$(MainFrameworkTarget)/Chromium Embedded Framework.framework')"
+      Command="cp -a &quot;$(SubprocessFramework)&quot; &quot;$(MainFrameworkTarget)/Chromium Embedded Framework.framework&quot;" />
+
+    <Warning Condition="!Exists('$(SubprocessFramework)/Resources/icudtl.dat')"
+      Text="icudtl.dat missing in subprocess framework at $(SubprocessFramework)" />
+    <Warning
+      Condition="!Exists('$(MainFrameworkTarget)/Chromium Embedded Framework.framework/Resources/icudtl.dat')"
+      Text="icudtl.dat missing in main framework at $(MainFrameworkTarget)/Chromium Embedded Framework.framework" />
   </Target>
 </Project>
