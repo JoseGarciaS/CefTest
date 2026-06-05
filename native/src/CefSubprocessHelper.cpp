@@ -11,9 +11,9 @@ int main(int argc, char *argv[])
 
 #if defined(__APPLE__)
     // Initialize the macOS sandbox for this helper process.
-    CefScopedSandboxContext sandbox_context;
-    if (!sandbox_context.Initialize(argc, argv))
-        return 1;
+    // CefScopedSandboxContext sandbox_context;
+    // if (!sandbox_context.Initialize(argc, argv))
+    //     return 1;
 
     // Load the CEF framework library at runtime instead of linking directly
     // as required by the macOS sandbox implementation.
