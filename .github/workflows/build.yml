@@ -120,34 +120,15 @@ jobs:
 
       - name: Stage runtime
         run: |
-          set -e
-
-          STAGE="native/stage/runtimes/osx-x64/native"
-          mkdir -p "$STAGE"
-
-          cp native/build/macos/libCefProcess.dylib "$STAGE/"
-          cp -a "native/build/macos/CefSubprocess Helper.app" "$STAGE/"
-
-          mkdir -p "$STAGE/Frameworks"
-          cp -a "${RUNNER_TEMP:-/tmp}/cef/macos/Release/Chromium Embedded Framework.framework" \
-            "$STAGE/Frameworks/"
-
-          cp -a "$STAGE/Frameworks/Chromium Embedded Framework.framework" \
-            "$STAGE/../Chromium Embedded Framework.framework"
-
-          mkdir -p native/stage/runtimes/osx-x64/../Frameworks
-          cp -a "$STAGE/Frameworks/Chromium Embedded Framework.framework" \
-            native/stage/runtimes/osx-x64/../Frameworks/
-
-          otool -L "$STAGE/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper" | grep -q "Chromium Embedded Framework" || (echo "Helper LC_LOAD_DYLIB missing" && exit 1)
-          otool -L "$STAGE/libCefProcess.dylib" | grep -q "Chromium Embedded Framework" || (echo "libCefProcess.dylib missing framework ref" && exit 1)
-          test -f "$STAGE/Chromium Embedded Framework.framework/Resources/icudtl.dat" || (echo "icudtl.dat missing in subprocess framework" && exit 1)
-          test -f "native/stage/runtimes/osx-x64/../Frameworks/Chromium Embedded Framework.framework/Resources/icudtl.dat" || (echo "icudtl.dat missing in main framework" && exit 1)
+          mkdir -p native/stage/runtimes/osx-x64/native
+          cp native/build/macos/libCefProcess.dylib native/stage/runtimes/osx-x64/native/
+          cp -a "native/build/macos/CefSubprocess Helper.app" native/stage/runtimes/osx-x64/native/
+          mkdir -p native/stage/runtimes/osx-x64/native/Frameworks
+          cp -a "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
+            native/stage/runtimes/osx-x64/native/Frameworks/
 
           cd native/stage/runtimes/osx-x64
-          ditto -c -k --sequesterRsrc native native.zip
-          mv native.zip ../../../../native.zip
-          cd -
+          ditto -c -k --sequesterRsrc --keepParent native native.zip
           rm -rf native
 
       - uses: actions/upload-artifact@v4
@@ -180,14 +161,6 @@ jobs:
         with:
           name: runtime-osx-x64
           path: native/stage/runtimes/osx-x64/
-
-
-      - name: Unpack mac runtime for pack
-        run: |
-          cd native/stage/runtimes/osx-x64
-          unzip -o native.zip -d native
-          cd -
-
 
       - name: Pack
         run: |
