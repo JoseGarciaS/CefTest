@@ -2,26 +2,34 @@
 
   <Target Name="CopyCefNativeToOutput" AfterTargets="Build">
     <ItemGroup>
-      <_CefNativeAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
-                        Condition="'$(RuntimeIdentifier)' != ''" />
+      <_CefNativeAssets
+        Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
+        Condition="'$(RuntimeIdentifier)' != ''" />
+      <_CefNativeAssets
+        Remove="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\CefSubprocess Helper.app\Contents\Frameworks\**\*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_CefNativeAssets)"
-          DestinationFolder="$(OutputPath)%(RecursiveDir)"
-          SkipUnchangedFiles="true"
-          Condition="'@(_CefNativeAssets)' != ''" />
+      DestinationFolder="$(OutputPath)%(RecursiveDir)"
+      SkipUnchangedFiles="true"
+      Condition="'@(_CefNativeAssets)' != ''" />
   </Target>
 
   <Target Name="CopyCefNativeToPublish" AfterTargets="Publish">
     <ItemGroup>
-      <_CefNativePublishAssets Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
-                               Condition="'$(RuntimeIdentifier)' != ''" />
+
+      <_CefNativePublishAssets
+        Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
+        Condition="'$(RuntimeIdentifier)' != ''" />
+
+      <_CefNativePublishAssets
+        Remove="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\CefSubprocess Helper.app\Contents\Frameworks\**\*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_CefNativePublishAssets)"
-          DestinationFolder="$(PublishDir)%(RecursiveDir)"
-          SkipUnchangedFiles="true"
-          Condition="'@(_CefNativePublishAssets)' != ''" />
+      DestinationFolder="$(PublishDir)%(RecursiveDir)"
+      SkipUnchangedFiles="true"
+      Condition="'@(_CefNativePublishAssets)' != ''" />
   </Target>
 
 </Project>
