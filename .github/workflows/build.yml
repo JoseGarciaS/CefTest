@@ -128,7 +128,7 @@ jobs:
             native/stage/runtimes/osx-x64/native/Frameworks/
 
           cd native/stage/runtimes/osx-x64
-          ditto -c -k --sequesterRsrc --keepParent native native.zip
+          ditto -c -k --sequesterRsrc native native.zip
           rm -rf native
 
       - uses: actions/upload-artifact@v4
