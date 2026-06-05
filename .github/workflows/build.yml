@@ -127,10 +127,14 @@ jobs:
           cp -a "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
             native/stage/runtimes/osx-x64/native/Frameworks/
 
+          cd native/stage/runtimes/osx-x64
+          ditto -c -k --sequesterRsrc --keepParent native native.zip
+          rm -rf native
+
       - uses: actions/upload-artifact@v4
         with:
           name: runtime-osx-x64
-          path: native/stage/runtimes/osx-x64/native
+          path: native/stage/runtimes/osx-x64/native.zip
 
   pack-nuget:
     runs-on: ubuntu-latest
@@ -156,7 +160,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: runtime-osx-x64
-          path: native/stage/runtimes/osx-x64/native
+          path: native/stage/runtimes/osx-x64/
 
       - name: Pack
         run: |
