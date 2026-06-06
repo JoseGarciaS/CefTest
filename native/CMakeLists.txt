@@ -57,13 +57,13 @@ if (WIN32)
     target_compile_definitions(CefProcess PRIVATE NOMINMAX)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(CefProcess PROPERTIES
+# if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+#     set_target_properties(CefProcess PROPERTIES
         # MACOSX_RPATH TRUE
         # BUILD_WITH_INSTALL_RPATH TRUE
         # INSTALL_RPATH "@loader_path/Frameworks"
-    )
-endif()
+#     )
+# endif()
 
 # ------------------------------------------------------------------
 # Subprocess executable
