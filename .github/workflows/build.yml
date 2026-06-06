@@ -128,10 +128,6 @@ jobs:
           cp -a "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
             "native/stage/runtimes/osx-x64/native/CefSubprocess Helper.app/Contents/Frameworks/"
 
-          mkdir -p native/stage/runtimes/osx-x64/native/Frameworks
-          cp -a "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
-            native/stage/runtimes/osx-x64/native/Frameworks/
-
           cd native/stage/runtimes/osx-x64
           ditto -c -k --sequesterRsrc native native.zip
           rm -rf native
