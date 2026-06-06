@@ -122,11 +122,7 @@ jobs:
         run: |
           mkdir -p native/stage/runtimes/osx-x64/native
           cp native/build/macos/libCefProcess.dylib native/stage/runtimes/osx-x64/native/
-
-          mkdir -p native/stage/runtimes/osx-x64/native/Frameworks
-          cp -a "native/build/macos/CefSubprocess Helper.app" native/stage/runtimes/osx-x64/native/Frameworks
-          cp -a "/tmp/cef/macos/Release/Chromium Embedded Framework.framework" \
-          native/stage/runtimes/osx-x64/native/Frameworks/
+          cp -a native/build/macos/Frameworks native/stage/runtimes/osx-x64/native/
 
           cd native/stage/runtimes/osx-x64
           ditto -c -k --sequesterRsrc native native.zip

@@ -7,8 +7,6 @@
       <_CefNativeAssets
         Include="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\**\*"
         Condition="'$(RuntimeIdentifier)' != ''" />
-      <_CefNativeAssets
-        Remove="$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\CefSubprocess Helper.app\Contents\Frameworks\**\*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_CefNativeAssets)"
@@ -36,12 +34,12 @@
   <Target Name="ExtractCefNativeMacOSToOutput" AfterTargets="Build"
     Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
     <Exec
-      Command="unzip -o '$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip' -d '$(OutputPath)'" />
+      Command="ditto -x -k '$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip' '$(OutputPath)'" />
   </Target>
 
   <Target Name="ExtractCefNativeMacOSToPublish" AfterTargets="Publish"
     Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
     <Exec
-      Command="unzip -o '$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip' -d '$(PublishDir)'" />
+      Command="ditto -x -k '$(MSBuildThisFileDirectory)..\runtimes\osx-x64\native.zip' '$(PublishDir)'" />
   </Target>
 </Project>

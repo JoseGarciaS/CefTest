@@ -25,11 +25,13 @@ find_package(CEF REQUIRED)
 add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 # Platform-specific CEF library to link against
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(CEF_LIB_TARGET "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
-else()
-    set(CEF_LIB_TARGET "$<$<CONFIG:Debug>:${CEF_LIB_DEBUG}>$<$<NOT:$<CONFIG:Debug>>:${CEF_LIB_RELEASE}>")
-endif()
+# if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+#     set(CEF_LIB_TARGET "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework")
+# else()
+#     set(CEF_LIB_TARGET "$<$<CONFIG:Debug>:${CEF_LIB_DEBUG}>$<$<NOT:$<CONFIG:Debug>>:${CEF_LIB_RELEASE}>")
+# endif()
+
+set(CEF_LIB_TARGET "$<$<CONFIG:Debug>:${CEF_LIB_DEBUG}>$<$<NOT:$<CONFIG:Debug>>:${CEF_LIB_RELEASE}>")
 
 # Main browser process executable
 add_library(CefProcess SHARED
@@ -50,20 +52,22 @@ target_include_directories(CefProcess PRIVATE
 target_link_libraries(CefProcess
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS}
-    ${CEF_LIB_TARGET}
+    $<$<NOT:$<PLATFORM_ID:Darwin>>:${CEF_LIB_TARGET}>
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_libraries(CefProcess
+        "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework/Chromium Embedded Framework"
+    )
+    set_target_properties(CefProcess PROPERTIES
+        BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "@loader_path/Frameworks"
+    )
+endif()
 
 if (WIN32)
     target_compile_definitions(CefProcess PRIVATE NOMINMAX)
 endif()
-
-# if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-#     set_target_properties(CefProcess PROPERTIES
-        # MACOSX_RPATH TRUE
-        # BUILD_WITH_INSTALL_RPATH TRUE
-        # INSTALL_RPATH "@loader_path/Frameworks"
-#     )
-# endif()
 
 # ------------------------------------------------------------------
 # Subprocess executable
@@ -74,32 +78,46 @@ add_executable(CefSubprocess
 target_include_directories(CefSubprocess PRIVATE
     ${CEF_ROOT}
     ${CEF_ROOT}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(CefSubprocess
     libcef_dll_wrapper
     ${CEF_STANDARD_LIBS}
-    ${CEF_LIB_TARGET}
+    $<$<NOT:$<PLATFORM_ID:Darwin>>:${CEF_LIB_TARGET}>
 )
 
 if (WIN32)
     target_compile_definitions(CefSubprocess PRIVATE NOMINMAX)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set_target_properties(CefSubprocess PROPERTIES
-        MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_BUNDLE_NAME "CefSubprocess Helper"
-        OUTPUT_NAME "CefSubprocess Helper"
-        # MACOSX_RPATH TRUE
-        # BUILD_WITH_INSTALL_RPATH TRUE
-        # INSTALL_RPATH "@loader_path/../../../Frameworks"
-    )
-endif()
 
 if(UNIX AND NOT APPLE)
     target_link_options(CefProcess PRIVATE -static-libstdc++ -static-libgcc)
     target_link_options(CefSubprocess PRIVATE -static-libstdc++ -static-libgcc)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+
+    set_target_properties(CefSubprocess PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_BUNDLE_NAME "CefSubprocess Helper"
+        MACOSX_BUNDLE_BUNDLE_IDENTIFIER "com.test.ceftest.helper"
+        OUTPUT_NAME "CefSubprocess Helper"
+    )
+
+    set(MACOS_FRAMEWORKS "${CMAKE_CURRENT_BINARY_DIR}/Frameworks")
+    add_dependencies(CefProcess CefSubprocess)
+
+    add_custom_command(TARGET CefProcess POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${MACOS_FRAMEWORKS}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework"
+            "${MACOS_FRAMEWORKS}/Chromium Embedded Framework.framework"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_BINARY_DIR}/CefSubprocess Helper.app"
+            "${MACOS_FRAMEWORKS}/CefSubprocess Helper.app"
+        VERBATIM
+    )
 endif()
