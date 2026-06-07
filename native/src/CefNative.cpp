@@ -33,7 +33,7 @@ extern "C"
                 std::string fw_path = (std::filesystem::path(lib_dir) /
                                        "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
                                           .string();
-                if (!cef_load_library(fw_path))
+                if (!cef_load_library(fw_path.c_str()))
                 {
                         std::cerr << "Failed to open/find the framework." << std::endl;
 
