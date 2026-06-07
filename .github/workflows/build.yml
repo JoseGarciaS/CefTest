@@ -36,7 +36,7 @@ jobs:
           cmake -B native/build/linux -S native -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCEF_ROOT=/tmp/cef/linux
-          cmake --build native/build/linux --target CefSubprocess CefProcess
+          cmake --build native/build/linux --target CefSubprocess CefProcess --parallel
 
       - name: Stage runtime
         run: |
@@ -73,7 +73,7 @@ jobs:
       - name: Build
         run: |
           cmake -B native/build/windows -S native -DCEF_ROOT=C:\cef\windows
-          cmake --build native/build/windows --target CefSubprocess CefProcess --config Release
+          cmake --build native/build/windows --target CefSubprocess CefProcess --config Release --parallel
 
       - name: Stage runtime
         shell: pwsh
@@ -116,7 +116,7 @@ jobs:
           cmake -B native/build/macos -S native -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCEF_ROOT=/tmp/cef/macos
-          cmake --build native/build/macos --target CefSubprocess CefProcess
+          cmake --build native/build/macos --target CefSubprocess CefProcess --parallel
 
       - name: Stage runtime
         run: |
