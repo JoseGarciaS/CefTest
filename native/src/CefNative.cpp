@@ -78,10 +78,12 @@ extern "C"
 #endif
                 std::cout << subprocess_path << std::endl;
 #if defined(__APPLE__)
-                // std::string fw_path = lib_path + "/CefSubprocess Helper.app/Contents/Frameworks";
-                // std::string res_path = fw_path + "/Chromium Embedded Framework.framework/Resources";
-                // CefString(&settings.framework_dir_path).FromString(fw_path);
-                // CefString(&settings.resources_dir_path).FromString(res_path);
+                std::string fw_path_dir = (std::filesystem::path(lib_dir) /
+                                           "Frameworks/Chromium Embedded Framework.framework")
+                                              .string();
+                std::string res_path = res_path_dir + "/Resources";
+                CefString(&settings.framework_dir_path).FromString(fw_path_dir);
+                / CefString(&settings.resources_dir_path).FromString(res_path_dir);
 
 #else
                 CefString(&settings.resources_dir_path).FromString(lib_path);
