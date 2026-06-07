@@ -17,11 +17,6 @@
 #include <dlfcn.h>
 #endif
 
-void AssignCefString(cef_string_t *target, const std::string &str)
-{
-        cef_string_utf8_to_utf16(str.c_str(), str.length(), target);
-}
-
 // Program entry-point function.
 extern "C"
 {
@@ -38,15 +33,26 @@ extern "C"
                 std::string fw_path = (std::filesystem::path(lib_dir) /
                                        "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
                                           .string();
-                std::cerr << "lib_dir: " << lib_dir << std::endl;
-                std::cerr << "fw_path: " << fw_path << std::endl;
-                void *fw_handle = dlopen(fw_path.c_str(), RTLD_GLOBAL | RTLD_NOW);
-                if (!fw_handle)
+                if (!cef_load_library(fw_path))
                 {
-                        std::cerr << "dlopen failed: " << dlerror() << std::endl;
+                        std::cerr << "Failed to open/find the framework." << std::endl;
+
                         return 1;
                 }
-                std::cerr << "Framework loaded OK" << std::endl;
+                else
+                {
+                        std::cout << "Framework loaded successfully." << std::endl;
+                }
+
+                // std::cerr << "lib_dir: " << lib_dir << std::endl;
+                // std::cerr << "fw_path: " << fw_path << std::endl;
+                // void *fw_handle = dlopen(fw_path.c_str(), RTLD_GLOBAL | RTLD_NOW);
+                // if (!fw_handle)
+                // {
+                //         std::cerr << "dlopen failed: " << dlerror() << std::endl;
+                //         return 1;
+                // }
+                // std::cerr << "Framework loaded OK" << std::endl;
 #endif
 
 #if defined(_WIN32)
@@ -77,19 +83,16 @@ extern "C"
                 // CefString(&settings.framework_dir_path).FromString(fw_path);
                 // CefString(&settings.resources_dir_path).FromString(res_path);
 
-                std::cout << "*** setting paths ***" << std::endl;
-                AssignCefString(&settings.browser_subprocess_path, subprocess_path);
-                AssignCefString(&settings.log_file, (std::filesystem::path(lib_path) / "cef_debug.log").string());
-                AssignCefString(&settings.cache_path, (std::filesystem::path(lib_path) / "cache").string());
-                std::cout << "*** done ***" << std::endl;
-
 #else
                 CefString(&settings.resources_dir_path).FromString(lib_path);
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
+
+#endif
+                std::cout << "*** setting paths ***" << std::endl;
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
                 CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
-#endif
+                std::cout << "*** done ***" << std::endl;
 
                 // Initialize CEF in the main process.
                 std::cout << "CEF initialization" << std::endl;
