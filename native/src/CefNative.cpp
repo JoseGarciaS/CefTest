@@ -83,7 +83,7 @@ extern "C"
                                               .string();
                 std::string res_path = res_path_dir + "/Resources";
                 CefString(&settings.framework_dir_path).FromString(fw_path_dir);
-                / CefString(&settings.resources_dir_path).FromString(res_path_dir);
+                CefString(&settings.resources_dir_path).FromString(res_path_dir);
 
 #else
                 CefString(&settings.resources_dir_path).FromString(lib_path);
