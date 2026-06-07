@@ -51,6 +51,7 @@ extern "C"
                 CefSettings settings2;
 #endif
 
+                std::cout << "main_args" << std::endl;
 #if defined(_WIN32)
                 CefMainArgs main_args(GetModuleHandle(nullptr));
 #else
@@ -59,16 +60,17 @@ extern "C"
 
                 // Structure for passing command-line arguments.
                 // The definition of this structure is platform-specific.
-
+                std::cout << "app" << std::endl;
                 // Implementation of the CefApp interface.
                 CefRefPtr<MyApp> app(new MyApp);
-
+                std::cout << "settings + sandbox" << std::endl;
                 // Populate this structure to customize CEF behavior.
                 CefSettings settings;
                 settings.no_sandbox = true;
-
+                std::cout << "lib_path" << std::endl;
                 const std::string lib_path = std::filesystem::path(lib_dir).string();
-
+                std::cout << lib_path << std::endl;
+                std::cout << "subprocess_path" << std::endl;
 #if defined(_WIN32)
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess.exe").string();
 #elif defined(__APPLE__)
@@ -76,7 +78,7 @@ extern "C"
 #else
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess").string();
 #endif
-
+                std::cout << subprocess_path << std::endl;
 #if defined(__APPLE__)
                 // std::string fw_path = lib_path + "/CefSubprocess Helper.app/Contents/Frameworks";
                 // std::string res_path = fw_path + "/Chromium Embedded Framework.framework/Resources";
@@ -87,6 +89,7 @@ extern "C"
                 CefString(&settings.resources_dir_path).FromString(lib_path);
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
 #endif
+                std::cout << "browser_subprocess + log + cache" << std::endl;
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
