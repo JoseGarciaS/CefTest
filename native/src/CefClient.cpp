@@ -41,7 +41,8 @@ public:
     void OnPdfPrintFinished(const CefString &path, bool ok) override
     {
         std::cout << (ok ? "PDF saved: " : "PDF failed: ") << path.ToString() << std::endl;
-        CefQuitMessageLoop();
+        // CefQuitMessageLoop();
+        exit(0);
     }
     IMPLEMENT_REFCOUNTING(PdfCallback);
 };
