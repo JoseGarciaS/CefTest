@@ -213,6 +213,12 @@ jobs:
       - name: Run
         run: |
           cd /tmp/CefTest/publish
+          echo "--- publish layout ---"
+          find . -maxdepth 4 | sort
+          echo "--- framework exists ---"
+          ls "Frameworks/Chromium Embedded Framework.framework/" || echo "MISSING"
+          echo "--- subprocess exists ---"
+          ls "Frameworks/CefSubprocess Helper.app/Contents/MacOS/" || echo "MISSING"
           ./CefTest
 
       - uses: actions/upload-artifact@v4
