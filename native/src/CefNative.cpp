@@ -17,6 +17,11 @@
 #include <dlfcn.h>
 #endif
 
+void AssignCefString(cef_string_t *target, const std::string &str)
+{
+        cef_string_utf8_to_utf16(str.c_str(), str.length(), target);
+}
+
 // Program entry-point function.
 extern "C"
 {
