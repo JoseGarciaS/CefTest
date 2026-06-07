@@ -44,11 +44,11 @@ extern "C"
                 std::cerr << "Framework loaded OK" << std::endl;
 
                 std::cerr << "Building CefMainArgs" << std::endl;
-                CefMainArgs main_args(argc, argv);
+                CefMainArgs main_args2(argc, argv);
                 std::cerr << "Creating MyApp" << std::endl;
-                CefRefPtr<MyApp> app(new MyApp);
+                CefRefPtr<MyApp> app2(new MyApp);
                 std::cerr << "Building settings" << std::endl;
-                CefSettings settings;
+                CefSettings settings2;
 #endif
 
 #if defined(_WIN32)
