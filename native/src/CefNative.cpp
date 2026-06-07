@@ -25,9 +25,15 @@ extern "C"
 #if defined(__APPLE__)
                 // Load the CEF framework library at runtime instead of linking directly
                 // as required by the macOS sandbox implementation.
-                CefScopedLibraryLoader library_loader;
-                if (!library_loader.LoadInMain())
-                        return 1;
+                // CefScopedLibraryLoader library_loader;
+                // if (!library_loader.LoadInMain())
+                //         return 1;
+
+                dlopen((std::filesystem::path(lib_dir) /
+                        "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
+                           .string()
+                           .c_str(),
+                       RTLD_GLOBAL | RTLD_NOW);
 #endif
 
 #if defined(_WIN32)
@@ -56,10 +62,6 @@ extern "C"
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess").string();
 #endif
 
-                CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
-                CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
-                CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
-
 #if defined(__APPLE__)
                 // std::string fw_path = lib_path + "/CefSubprocess Helper.app/Contents/Frameworks";
                 // std::string res_path = fw_path + "/Chromium Embedded Framework.framework/Resources";
@@ -72,6 +74,8 @@ extern "C"
 #endif
 
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
+                CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
+                CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
 
                 // Initialize CEF in the main process.
                 std::cout << "CEF initialization" << std::endl;
