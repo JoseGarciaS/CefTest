@@ -4,6 +4,7 @@
 #include <filesystem>
 #include "CefNative.hpp"
 #include "CefApp.hpp"
+#include "include/internal/cef_string_types.h"
 #include <iostream>
 
 #if defined(__APPLE__)
@@ -25,17 +26,10 @@ extern "C"
 #if defined(__APPLE__)
                 // Load the CEF framework library at runtime instead of linking directly
                 // as required by the macOS sandbox implementation.
-                CefScopedLibraryLoader library_loader;
-                if (!library_loader.LoadInMain())
-                {
-                        std::cerr << "CefScopedLibraryLoader::LoadInMain failed\n";
-                        std::cerr.flush();
-                        return 1;
-                }
-                std::cerr << "CEF library loaded via CefScopedLibraryLoader\n";
-                std::cerr.flush();
+                // CefScopedLibraryLoader library_loader;
+                // if (!library_loader.LoadInMain())
+                //         return 1;
 
-                std::cout << lib_dir << std::endl;
                 std::string fw_path = (std::filesystem::path(lib_dir) /
                                        "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
                                           .string();
@@ -78,17 +72,19 @@ extern "C"
                 // CefString(&settings.framework_dir_path).FromString(fw_path);
                 // CefString(&settings.resources_dir_path).FromString(res_path);
 
+                std::cout << "*** setting paths ***" << std::endl;
+                AssignCefString(&settings.browser_subprocess_path, subprocess_path);
+                AssignCefString(&settings.log_file, (std::filesystem::path(lib_path) / "cef_debug.log").string());
+                AssignCefString(&settings.cache_path, (std::filesystem::path(lib_path) / "cache").string());
+                std::cout << "*** done ***" << std::endl;
+
 #else
                 CefString(&settings.resources_dir_path).FromString(lib_path);
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
-#endif
-                std::cout << "*** browser_subprocess ***" << std::endl;
-
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
-                std::cout << "log " << std::endl;
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
-                std::cout << "cache" << std::endl;
                 CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
+#endif
 
                 // Initialize CEF in the main process.
                 std::cout << "CEF initialization" << std::endl;
