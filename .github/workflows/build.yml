@@ -213,6 +213,10 @@ jobs:
       - name: Run
         run: |
           cd /tmp/CefTest/publish
+           codesign --force --sign - \
+             "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework"
+           codesign --force --sign - \
+             "Frameworks/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper"
           codesign -dv "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework" 2>&1 || echo "NOT SIGNED"
           echo "--- publish layout ---"
           find . -maxdepth 4 | sort
