@@ -75,46 +75,9 @@ extern "C"
 #else
                 CefString(&settings.resources_dir_path).FromString(lib_path);
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
+                CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
 #endif
                 std::cout << "*** browser_subprocess ***" << std::endl;
-
-                try
-                {
-                        std::cerr << "Checking subprocess path: " << subprocess_path << "\n";
-                        std::cerr.flush();
-
-                        if (!std::filesystem::exists(subprocess_path))
-                        {
-                                std::cerr << "ERROR: subprocess not found: " << subprocess_path << "\n";
-                                std::cerr.flush();
-                                return 1;
-                        }
-                        else
-                        {
-                                std::cerr << "subprocess found: " << subprocess_path << "\n";
-                                std::cerr.flush();
-                        }
-                }
-                catch (const std::filesystem::filesystem_error &fe)
-                {
-                        std::cerr << "filesystem_error: " << fe.what() << " ; path1=" << fe.path1() << " ; path2=" << fe.path2() << "\n";
-                        std::cerr.flush();
-                        return 1;
-                }
-                catch (const std::exception &ex)
-                {
-                        std::cerr << "exception: " << ex.what() << "\n";
-                        std::cerr.flush();
-                        return 1;
-                }
-                catch (...)
-                {
-                        std::cerr << "unknown error while checking subprocess path\n";
-                        std::cerr.flush();
-                        return 1;
-                }
-
-                CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 std::cout << "log " << std::endl;
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
                 std::cout << "cache" << std::endl;
