@@ -81,7 +81,7 @@ extern "C"
                 std::string fw_path_dir = (std::filesystem::path(lib_dir) /
                                            "Frameworks/Chromium Embedded Framework.framework")
                                               .string();
-                std::string res_path = fw_path_dir + "/Resources";
+                std::string res_path_dir = fw_path_dir + "/Resources";
                 CefString(&settings.framework_dir_path).FromString(fw_path_dir);
                 CefString(&settings.resources_dir_path).FromString(res_path_dir);
 
