@@ -85,13 +85,16 @@ extern "C"
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
 #endif
                 std::cout << "*** browser_subprocess ***" << std::endl;
-                std::cout << subprocess_path << std::endl;
 
                 if (!std::filesystem::exists(subprocess_path))
                 {
                         std::cerr << "ERROR: subprocess not found: " << subprocess_path << "\n";
                         std::cerr.flush();
                         return 1;
+                }
+                else
+                {
+                        std::cout << "subprocess found: " << subprocess_path << "\n";
                 }
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 std::cout << "log " << std::endl;
