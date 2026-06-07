@@ -42,6 +42,13 @@ extern "C"
                         return 1;
                 }
                 std::cerr << "Framework loaded OK" << std::endl;
+
+                std::cerr << "Building CefMainArgs" << std::endl;
+                CefMainArgs main_args(argc, argv);
+                std::cerr << "Creating MyApp" << std::endl;
+                CefRefPtr<MyApp> app(new MyApp);
+                std::cerr << "Building settings" << std::endl;
+                CefSettings settings;
 #endif
 
 #if defined(_WIN32)
