@@ -76,12 +76,12 @@ extern "C"
                 CefString(&settings.resources_dir_path).FromString(lib_path);
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
+                CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
+                CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
 #endif
                 std::cout << "*** browser_subprocess ***" << std::endl;
                 std::cout << "log " << std::endl;
-                CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
                 std::cout << "cache" << std::endl;
-                CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
 
                 // Initialize CEF in the main process.
                 std::cout << "CEF initialization" << std::endl;
