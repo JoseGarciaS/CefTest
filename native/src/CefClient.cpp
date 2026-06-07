@@ -1,13 +1,9 @@
 #include "CefClient.hpp"
-#include "include/cef_thread.h"
 #include "include/cef_app.h"
 #include <iostream>
 
 void MyClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
-    // Must be executed on the UI thread.
-    // REQUIRE_UI_THREAD();
-
     if (!browser_)
     {
         // Keep a reference to the main browser.
@@ -38,12 +34,16 @@ void MyClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 class PdfCallback : public CefPdfPrintCallback
 {
 public:
+    PdfCallback(CefRefPtr<CefBrowser> browser) : browser_(browser) {};
+
     void OnPdfPrintFinished(const CefString &path, bool ok) override
     {
         std::cout << (ok ? "PDF saved: " : "PDF failed: ") << path.ToString() << std::endl;
-        // CefQuitMessageLoop();
-        exit(0);
+        browser_->GetHost()->CloseBrowser(true);
     }
+
+private:
+    CefRefPtr<CefBrowser> browser_;
     IMPLEMENT_REFCOUNTING(PdfCallback);
 };
 
@@ -54,5 +54,5 @@ void MyClient::OnLoadEnd(CefRefPtr<CefBrowser> browser,
     if (!frame->IsMain())
         return;
     CefPdfPrintSettings pdf_settings;
-    browser->GetHost()->PrintToPDF("output.pdf", pdf_settings, new PdfCallback());
+    browser->GetHost()->PrintToPDF("output.pdf", pdf_settings, new PdfCallback(browser));
 }

@@ -1,3 +1,4 @@
+#pragma once
 #include "include/cef_client.h"
 
 class MyClient : public CefClient, public CefLifeSpanHandler, public CefLoadHandler
@@ -14,7 +15,7 @@ class MyClient : public CefClient, public CefLifeSpanHandler, public CefLoadHand
     void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode) override;
 
     // Member accessors.
-    CefRefPtr<CefBrowser> GetBrower() const { return browser_; }
+    CefRefPtr<CefBrowser> GetBrowser() const { return browser_; }
     bool IsClosing() const { return is_closing_; }
 
 private:

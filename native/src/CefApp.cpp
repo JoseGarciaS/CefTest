@@ -4,10 +4,6 @@
 void MyWindowDelegate::OnWindowCreated(CefRefPtr<CefWindow> window)
 {
     window->AddChildView(browser_view_);
-
-#if defined(__APPLE__)
-    window->Hide();
-#endif
     window->Show();
 }
 

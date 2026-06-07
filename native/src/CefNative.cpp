@@ -4,7 +4,6 @@
 #include <filesystem>
 #include "CefNative.hpp"
 #include "CefApp.hpp"
-#include "include/internal/cef_string_types.h"
 #include <iostream>
 
 #if defined(__APPLE__)
@@ -24,35 +23,15 @@ extern "C"
         {
 
 #if defined(__APPLE__)
-                // Load the CEF framework library at runtime instead of linking directly
-                // as required by the macOS sandbox implementation.
-                // CefScopedLibraryLoader library_loader;
-                // if (!library_loader.LoadInMain())
-                //         return 1;
-
+                // Load the CEF framework library at runtime.
                 std::string fw_path = (std::filesystem::path(lib_dir) /
                                        "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
                                           .string();
                 if (!cef_load_library(fw_path.c_str()))
                 {
                         std::cerr << "Failed to open/find the framework." << std::endl;
-
                         return 1;
                 }
-                else
-                {
-                        std::cout << "Framework loaded successfully." << std::endl;
-                }
-
-                // std::cerr << "lib_dir: " << lib_dir << std::endl;
-                // std::cerr << "fw_path: " << fw_path << std::endl;
-                // void *fw_handle = dlopen(fw_path.c_str(), RTLD_GLOBAL | RTLD_NOW);
-                // if (!fw_handle)
-                // {
-                //         std::cerr << "dlopen failed: " << dlerror() << std::endl;
-                //         return 1;
-                // }
-                // std::cerr << "Framework loaded OK" << std::endl;
 #endif
 
 #if defined(_WIN32)
@@ -61,10 +40,10 @@ extern "C"
                 CefMainArgs main_args(argc, argv);
 #endif
 
-                // Structure for passing command-line arguments.
                 // The definition of this structure is platform-specific.
                 // Implementation of the CefApp interface.
                 CefRefPtr<MyApp> app(new MyApp);
+
                 // Populate this structure to customize CEF behavior.
                 CefSettings settings;
                 settings.no_sandbox = true;
@@ -76,7 +55,7 @@ extern "C"
 #else
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess").string();
 #endif
-                std::cout << subprocess_path << std::endl;
+
 #if defined(__APPLE__)
                 std::string fw_path_dir = (std::filesystem::path(lib_dir) /
                                            "Frameworks/Chromium Embedded Framework.framework")
@@ -90,11 +69,9 @@ extern "C"
                 CefString(&settings.locales_dir_path).FromString((std::filesystem::path(lib_path) / "locales").string());
 
 #endif
-                std::cout << "*** setting paths ***" << std::endl;
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
                 CefString(&settings.cache_path).FromString((std::filesystem::path(lib_path) / "cache").string());
-                std::cout << "*** done ***" << std::endl;
 
                 // Initialize CEF in the main process.
                 std::cout << "CEF initialization" << std::endl;
