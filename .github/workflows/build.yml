@@ -175,3 +175,48 @@ jobs:
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
             --api-key "${{ secrets.GITHUB_TOKEN }}" \
             --skip-duplicate
+
+
+  test-macos:
+    runs-on: macos-15-intel
+    needs: [build-macos]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: runtime-osx-x64
+          path: native/stage/runtimes/osx-x64/
+
+      - name: Pack locally
+        run: |
+          cd dotnet/CefNative
+          dotnet pack -c Release -o /tmp/local-feed /p:Version=0.0.1-test
+
+      - name: Create test app
+        run: |
+          dotnet new console -n CefTest -o /tmp/CefTest
+          cd /tmp/CefTest
+          dotnet nuget add source /tmp/local-feed --name local
+          dotnet add package CefNative --version 0.0.1-test
+          echo 'using CefNative; return Cef.Run();' > Program.cs
+
+      - name: Publish
+        run: |
+          cd /tmp/CefTest
+          dotnet publish -r osx-x64 --self-contained -o publish
+
+      - name: Run
+        run: |
+          cd /tmp/CefTest/publish
+          ./CefTest
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cef-pdf-output
+          path: /tmp/CefTest/publish/output.pdf

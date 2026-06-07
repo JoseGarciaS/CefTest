@@ -1,6 +1,7 @@
 #include "CefClient.hpp"
 #include "include/cef_thread.h"
 #include "include/cef_app.h"
+#include <iostream>
 
 void MyClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
@@ -32,4 +33,25 @@ void MyClient::OnBeforeClose(CefRefPtr<CefBrowser> browser)
 
     if (--browser_count_ == 0)
         CefQuitMessageLoop();
+}
+
+class PdfCallback : public CefPdfPrintCallback
+{
+public:
+    void OnPdfPrintFinished(const CefString &path, bool ok) override
+    {
+        std::cout << (ok ? "PDF saved: " : "PDF failed: ") << path.ToString() << std::endl;
+        CefQuitMessageLoop();
+    }
+    IMPLEMENT_REFCOUNTING(PdfCallback);
+};
+
+void MyClient::OnLoadEnd(CefRefPtr<CefBrowser> browser,
+                         CefRefPtr<CefFrame> frame,
+                         int httpStatusCode)
+{
+    if (!frame->IsMain())
+        return;
+    CefPdfPrintSettings pdf_settings;
+    browser->GetHost()->PrintToPDF("output.pdf", pdf_settings, new PdfCallback());
 }

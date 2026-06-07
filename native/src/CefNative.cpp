@@ -51,7 +51,7 @@ extern "C"
 #if defined(_WIN32)
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess.exe").string();
 #elif defined(__APPLE__)
-                const std::string subprocess_path = (std::filesystem::path(lib_path) / "../Frameworks/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper").string();
+                const std::string subprocess_path = (std::filesystem::path(lib_path) / "Frameworks/CefSubprocess Helper.app/Contents/MacOS/CefSubprocess Helper").string();
 #else
                 const std::string subprocess_path = (std::filesystem::path(lib_path) / "CefSubprocess").string();
 #endif
