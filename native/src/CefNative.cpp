@@ -29,11 +29,19 @@ extern "C"
                 // if (!library_loader.LoadInMain())
                 //         return 1;
 
-                dlopen((std::filesystem::path(lib_dir) /
-                        "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
-                           .string()
-                           .c_str(),
-                       RTLD_GLOBAL | RTLD_NOW);
+                std::cout << lib_dir << std::endl;
+                std::string fw_path = (std::filesystem::path(lib_dir) /
+                                       "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework")
+                                          .string();
+                std::cerr << "lib_dir: " << lib_dir << std::endl;
+                std::cerr << "fw_path: " << fw_path << std::endl;
+                void *fw_handle = dlopen(fw_path.c_str(), RTLD_GLOBAL | RTLD_NOW);
+                if (!fw_handle)
+                {
+                        std::cerr << "dlopen failed: " << dlerror() << std::endl;
+                        return 1;
+                }
+                std::cerr << "Framework loaded OK" << std::endl;
 #endif
 
 #if defined(_WIN32)

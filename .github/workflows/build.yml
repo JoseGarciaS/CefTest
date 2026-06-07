@@ -213,6 +213,7 @@ jobs:
       - name: Run
         run: |
           cd /tmp/CefTest/publish
+          codesign -dv "Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework" 2>&1 || echo "NOT SIGNED"
           echo "--- publish layout ---"
           find . -maxdepth 4 | sort
           echo "--- framework exists ---"
