@@ -56,9 +56,7 @@ target_link_libraries(CefProcess
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    target_link_libraries(CefProcess
-        "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework/Chromium Embedded Framework"
-    )
+    target_link_options(CefProcess PRIVATE -undefined dynamic_lookup)
     set_target_properties(CefProcess PROPERTIES
         BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "@loader_path/Frameworks"
