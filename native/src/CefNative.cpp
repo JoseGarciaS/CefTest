@@ -42,16 +42,8 @@ extern "C"
                         return 1;
                 }
                 std::cerr << "Framework loaded OK" << std::endl;
-
-                std::cerr << "Building CefMainArgs" << std::endl;
-                CefMainArgs main_args2(argc, argv);
-                std::cerr << "Creating MyApp" << std::endl;
-                CefRefPtr<MyApp> app2(new MyApp);
-                std::cerr << "Building settings" << std::endl;
-                CefSettings settings2;
 #endif
 
-                std::cout << "main_args" << std::endl;
 #if defined(_WIN32)
                 CefMainArgs main_args(GetModuleHandle(nullptr));
 #else
@@ -86,16 +78,42 @@ extern "C"
 #endif
                 std::cout << "*** browser_subprocess ***" << std::endl;
 
-                if (!std::filesystem::exists(subprocess_path))
+                try
                 {
-                        std::cerr << "ERROR: subprocess not found: " << subprocess_path << "\n";
+                        std::cerr << "Checking subprocess path: " << subprocess_path << "\n";
+                        std::cerr.flush();
+
+                        if (!std::filesystem::exists(subprocess_path))
+                        {
+                                std::cerr << "ERROR: subprocess not found: " << subprocess_path << "\n";
+                                std::cerr.flush();
+                                return 1;
+                        }
+                        else
+                        {
+                                std::cerr << "subprocess found: " << subprocess_path << "\n";
+                                std::cerr.flush();
+                        }
+                }
+                catch (const std::filesystem::filesystem_error &fe)
+                {
+                        std::cerr << "filesystem_error: " << fe.what() << " ; path1=" << fe.path1() << " ; path2=" << fe.path2() << "\n";
                         std::cerr.flush();
                         return 1;
                 }
-                else
+                catch (const std::exception &ex)
                 {
-                        std::cout << "subprocess found: " << subprocess_path << "\n";
+                        std::cerr << "exception: " << ex.what() << "\n";
+                        std::cerr.flush();
+                        return 1;
                 }
+                catch (...)
+                {
+                        std::cerr << "unknown error while checking subprocess path\n";
+                        std::cerr.flush();
+                        return 1;
+                }
+
                 CefString(&settings.browser_subprocess_path).FromString(subprocess_path);
                 std::cout << "log " << std::endl;
                 CefString(&settings.log_file).FromString((std::filesystem::path(lib_path) / "cef_debug.log").string());
